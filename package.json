@@ -19,95 +19,87 @@
   "categories": [
     "Programming Languages",
     "Snippets",
-           "description": "Expression"
     "Other"
   ],
   "activationEvents": [],
-           "description": "Audio"
+  "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
-           "description": "Background music"
+        "command": "dialogue.removeDialogueIDs",
         "title": "Dialogue: Remove All Dialogue IDs",
         "category": "Dialogue"
       },
-           "description": "Effect"
+      {
         "command": "dialogue.addDialogueIDs",
         "title": "Dialogue: Add IDs to All Dialogue Lines",
         "category": "Dialogue"
-           "description": "Other tags"
+      },
       {
         "command": "dialogue.openTagSettings",
-        "title": "Dialogue: Open Tag Settings"
+        "title": "Dialogue: Open Tag Settings",
+        "category": "Dialogue"
       },
       {
         "command": "dialogue.addNewTag",
-             "description": "Happy expression",
-             "example": "NPC: Hello! [#happy]",
+        "title": "Dialogue: Add New Tag",
+        "category": "Dialogue"
+      },
       {
         "command": "dialogue.exportJSON",
         "title": "Dialogue: Export Dialogue",
         "category": "Dialogue"
-             "description": "Sad expression",
-             "example": "NPC: Sob... [#sad]",
+      },
+      {
         "command": "dialogue.previewJSON",
         "title": "Dialogue: Preview Dialogue (JSON)",
         "category": "Dialogue"
       },
-             "description": "Angry expression",
-             "example": "NPC: Damn it! [#angry]",
+      {
+        "command": "dialogue.copyJSON",
         "title": "Dialogue: Copy Dialogue (JSON)",
         "category": "Dialogue"
       }
     ],
-             "description": "Surprised expression",
-             "example": "NPC: What!? [#surprised]",
+    "menus": {
+      "editor/context": [
         {
           "when": "resourceLangId == dialogue",
           "command": "dialogue.removeDialogueIDs",
           "group": "dialogue@1"
-             "description": "Knocking sound",
-             "example": "NPC: *Knock knock* [#knock_sound]",
+        },
+        {
           "when": "resourceLangId == dialogue",
           "command": "dialogue.addDialogueIDs",
           "group": "dialogue@2"
         },
-             "description": "Explosion sound",
-             "example": "Boom! [#explosion_sound]",
+        {
+          "when": "resourceLangId == dialogue",
           "command": "dialogue.openTagSettings",
           "group": "dialogue@3"
         },
         {
-             "description": "Camera shake effect",
-             "example": "NPC: Prepare to die! [#camera_shake]",
+          "when": "resourceLangId == dialogue",
+          "command": "dialogue.addNewTag",
           "group": "dialogue@4"
         },
         {
           "when": "resourceLangId == dialogue",
-             "description": "Fade-out animation",
-             "example": "NPC: Goodbye... [#fade_out]",
+          "command": "dialogue.exportJSON",
+          "group": "dialogue@5"
         },
         {
           "when": "resourceLangId == dialogue",
           "command": "dialogue.previewJSON",
           "group": "dialogue@6"
-          "markdownDescription": "Custom tag configuration. Format:\n```json \n{ \"tagName\": { \"description\": \"Description\", \"example\": \"Example\", \"category\": \"Category\", \"alias\": [\"alias1\", \"alias2\"] } }\n```",
         },
         {
           "when": "resourceLangId == dialogue",
           "command": "dialogue.copyJSON",
           "group": "dialogue@7"
-               "description": "Tag description"
+        }
       ],
       "commandPalette": [
-        {
-               "description": "Usage example"
-          "when": "resourceLangId == dialogue"
-        },
-        {
-               "description": "Tag category (for example emotion, sound, animation, or camera)"
-          "when": "resourceLangId == dialogue"
-        },
         {
           "command": "dialogue.exportJSON",
           "when": "resourceLangId == dialogue"
