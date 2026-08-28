@@ -1,9 +1,9 @@
 {
-  "name": "dialogue-godot-support",
-  "displayName": "Godot Dialogue Manager Enhanced",
-  "description": "Powerful VS Code support for Godot 4.x Dialogue Manager, including syntax highlighting, intelligent Godot class and method completion, real-time type checking, go-to-definition, signature help, tag completion, and import path completion.",
-  "publisher": "hakubox",
-  "version": "0.3.5",
+  "name": "dialogue-manager-for-vscode",
+  "displayName": "Godot DialogueManager syntax",
+  "description": "VSCode support for Godot 4.x DialogueManager",
+  "publisher": "LoyDizak",
+  "version": "0.3.6",
   "icon": "icon.png",
   "repository": {
     "type": "git",
@@ -345,10 +345,9 @@
   "keywords": [
     "godot",
     "dialogue",
-    "game development",
-    "gdscript",
     "dialogue manager",
-    "dialogue_manager"
+    "dialogue_manager",
+    "DialougeManager"
   ],
   "tags": [
     "godot",
