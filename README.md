@@ -13,9 +13,9 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/LoyDizak/DialogueManager_VSCode_extention">GitHub</a> •
-  <a href="https://github.com/LoyDizak/DialogueManager_VSCode_extention/issues">Report an issue</a> •
-  <a href="https://github.com/LoyDizak/DialogueManager_VSCode_extention/releases">Download</a>
+  <a href="https://github.com/LoyDizak/DialogueManager_VSCode_extension">GitHub</a> •
+  <a href="https://github.com/LoyDizak/DialogueManager_VSCode_extension/issues">Report an issue</a> •
+  <a href="https://github.com/LoyDizak/DialogueManager_VSCode_extension/releases">Download</a>
 </p>
 
 ---
@@ -42,7 +42,7 @@
 4. Click **Install**
 
 #### Method B: Install manually from a `.vsix`
-1. Download the latest `.vsix` file from GitHub Releases [<sup>8</sup>](https://github.com/LoyDizak/DialogueManager_VSCode_extention/releases)
+1. Download the latest `.vsix` file from GitHub Releases [<sup>8</sup>](https://github.com/LoyDizak/DialogueManager_VSCode_extension/releases)
 2. Press `Ctrl+Shift+P` in VS Code
 3. Enter `Extensions: Install from VSIX...`
 4. Select the downloaded `.vsix` file
@@ -182,6 +182,6 @@ MIT License - See the LICENSE [<sup>9</sup>](LICENSE) file for details
 
 ## Contact
 
-- **GitHub Issues**: Submit an issue [<sup>13</sup>](https://github.com/LoyDizak/DialogueManager_VSCode_extention/issues)
+- **GitHub Issues**: Submit an issue [<sup>13</sup>](https://github.com/LoyDizak/DialogueManager_VSCode_extension/issues)
 - **Author**: hakubox
 - **Email**: hakubox@outlook.com

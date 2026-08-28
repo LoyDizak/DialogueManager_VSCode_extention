@@ -7,11 +7,11 @@
   "icon": "icon.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/LoyDizak/DialogueManager_VSCode_extention.git"
+    "url": "https://github.com/LoyDizak/DialogueManager_VSCode_extension.git"
   },
-  "homepage": "https://github.com/LoyDizak/DialogueManager_VSCode_extention#readme",
+  "homepage": "https://github.com/LoyDizak/DialogueManager_VSCode_extension#readme",
   "bugs": {
-    "url": "https://github.com/LoyDizak/DialogueManager_VSCode_extention/issues"
+    "url": "https://github.com/LoyDizak/DialogueManager_VSCode_extension/issues"
   },
   "engines": {
     "vscode": "^1.110.0"
