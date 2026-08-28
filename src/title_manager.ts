@@ -3,27 +3,27 @@ import * as path from 'path';
 import * as fs from 'fs';
 
 /**
- * 段落信息
+ * Title information
  */
 export interface TitleInfo {
-	name: string;           // 段落名（如 "start"）
-	fullName: string;       // 完整名（如 "a1/start"，跨文件时带别名）
-	line: number;           // 行号
-	uri: vscode.Uri;        // 文件 URI
-	comment?: string;       // 上方的注释
-	alias?: string;         // 所属文件的别名（跨文件时）
-	preview?: string;       // 第一句对话预览
+	name: string;           // Title name (for example "start")
+	fullName: string;       // Full name (for example "a1/start", with an alias across files)
+	line: number;           // Line number
+	uri: vscode.Uri;        // File URI
+	comment?: string;       // Preceding comment
+	alias?: string;         // Owning file alias (across files)
+	preview?: string;       // First dialogue line preview
 }
 
 /**
- * 段落管理器（支持跨文件）
+ * Title manager (supports cross-file titles)
  */
 export class TitleManager {
 	private titles: Map<string, TitleInfo[]> = new Map();
 	private importedTitles: Map<string, TitleInfo[]> = new Map();
 
 	/**
-	 * 扫描文档中的所有段落
+	 * Scan all titles in a document.
 	 */
 	public scanDocument(document: vscode.TextDocument): void {
 		const titles: TitleInfo[] = [];
@@ -35,9 +35,9 @@ export class TitleManager {
 			const line = lines[i];
 			const trimmed = line.trim();
 
-			// ✅ 修改：收集所有注释（包括 # 和 ##）
+			// ✅ Collect all comments, including # and ##.
 			if (trimmed.startsWith('#')) {
-				// 提取注释内容（去掉开头的 # 或 ##）
+				// Extract comment text after the leading # or ##.
 				const commentText = trimmed.replace(/^#+\s*/, '');
 
 				if (pendingComment) {
@@ -48,12 +48,12 @@ export class TitleManager {
 				continue;
 			}
 
-			// 匹配段落声明
+			// Match title declarations.
 			const titleMatch = trimmed.match(/^~\s+([^\s]+!?)/);
 			if (titleMatch) {
 				const titleName = titleMatch[1];
 
-				// 获取预览
+				// Get a preview.
 				const preview = this.getTitlePreview(lines, i + 1);
 
 				titles.push({
@@ -61,7 +61,7 @@ export class TitleManager {
 					fullName: titleName,
 					line: i,
 					uri: document.uri,
-					comment: pendingComment,  // ✅ 这里会包含话题上方的所有注释
+					comment: pendingComment,  // ✅ Includes all comments above the title.
 					preview: preview
 				});
 
@@ -69,30 +69,30 @@ export class TitleManager {
 				continue;
 			}
 
-			// 如果遇到非注释、非话题的内容，清空待处理的注释
+			// Clear pending comments after other content.
 			if (trimmed && !trimmed.startsWith('#')) {
 				pendingComment = undefined;
 			}
 		}
 
 		this.titles.set(document.uri.toString(), titles);
-		console.log(`[Dialogue] ✅ 文档 ${path.basename(document.uri.fsPath)} 扫描完成，找到 ${titles.length} 个段落`);
+		console.log(`[Dialogue] ✅ Scanned ${path.basename(document.uri.fsPath)}; found ${titles.length} titles`);
 
 		this.scanImportedTitles(document);
 	}
 
 	/**
-	 * 获取段落的第一句对话作为预览
+	 * Get the first dialogue line as a title preview.
 	 */
 	private getTitlePreview(lines: string[], startLine: number): string | undefined {
-		// 从段落定义的下一行开始，找到第一句对话
+		// Find dialogue starting after the title declaration.
 		for (let i = startLine; i < Math.min(startLine + 10, lines.length); i++) {
 			const line = lines[i].trim();
 
-			// 跳过空行和注释
+			// Skip blank lines and comments.
 			if (!line || line.startsWith('#')) continue;
 
-			// 匹配旁白（不是选项）
+			// Match narration, not choices.
 			if (!line.startsWith('-')) {
 				let content = line;
 
@@ -107,7 +107,7 @@ export class TitleManager {
 	}
 
 	/**
-	 * 扫描导入的文件中的段落
+	 * Scan titles in imported files.
 	 */
 	private scanImportedTitles(document: vscode.TextDocument): void {
 		const importedTitles: TitleInfo[] = [];
@@ -128,7 +128,7 @@ export class TitleManager {
 			);
 
 			if (!fs.existsSync(fsPath)) {
-				console.log(`[Dialogue] ⚠️ 导入的文件不存在: ${fsPath}`);
+				console.log(`[Dialogue] ⚠️ Imported file does not exist: ${fsPath}`);
 				continue;
 			}
 
@@ -136,14 +136,14 @@ export class TitleManager {
 			const importedLines = importedContent.split('\n');
 			const importedUri = vscode.Uri.file(fsPath);
 
-			// ✅ 新增：在导入文件中也收集注释
+			// ✅ Collect comments in imported files too.
 			let pendingComment: string | undefined;
 
 			for (let i = 0; i < importedLines.length; i++) {
 				const importedLine = importedLines[i];
 				const trimmed = importedLine.trim();
 
-				// 收集注释
+				// Collect comments.
 				if (trimmed.startsWith('#')) {
 					const commentText = trimmed.replace(/^#+\s*/, '');
 					if (pendingComment) {
@@ -159,7 +159,7 @@ export class TitleManager {
 				if (titleMatch) {
 					const titleName = titleMatch[1];
 
-					// 获取导入文件的预览
+					// Get a preview from the imported file.
 					const preview = this.getTitlePreview(importedLines, i + 1);
 
 					importedTitles.push({
@@ -168,15 +168,15 @@ export class TitleManager {
 						line: i,
 						uri: importedUri,
 						alias: alias,
-						comment: pendingComment,  // ✅ 包含注释
+						comment: pendingComment,  // ✅ Includes comments.
 						preview: preview
 					});
 
 					pendingComment = undefined;
-					console.log(`[Dialogue] 📦 导入段落: ${alias}/${titleName}`);
+					console.log(`[Dialogue] 📦 Imported title: ${alias}/${titleName}`);
 				}
 
-				// 清空注释
+				// Clear comments.
 				if (trimmed && !trimmed.startsWith('#') && !titleMatch) {
 					pendingComment = undefined;
 				}
@@ -184,10 +184,10 @@ export class TitleManager {
 		}
 
 		this.importedTitles.set(document.uri.toString(), importedTitles);
-		console.log(`[Dialogue] ✅ 导入了 ${importedTitles.length} 个跨文件段落`);
+		console.log(`[Dialogue] ✅ Imported ${importedTitles.length} cross-file titles`);
 	}
 
-	// ... 其他方法保持不变 ...
+	// ... Other methods remain unchanged ...
 
 	public getTitles(documentUri: vscode.Uri): TitleInfo[] {
 		const localTitles = this.titles.get(documentUri.toString()) || [];
@@ -212,7 +212,7 @@ export class TitleManager {
 }
 
 
-// ============ 段落跳转补全提供者 ============
+// ============ Title navigation completion provider ============
 
 export class TitleCompletionProvider implements vscode.CompletionItemProvider {
 	constructor(private titleManager: TitleManager) { }
@@ -224,12 +224,12 @@ export class TitleCompletionProvider implements vscode.CompletionItemProvider {
 		const line = document.lineAt(position.line).text;
 		const beforeCursor = line.substring(0, position.character);
 
-		console.log('[Dialogue] ========== 段落补全被触发 ==========');
+		console.log('[Dialogue] ========== Title completion triggered ==========');
 
-		// 检测 => 或 = 后面
+		// Check after => or =.
 		const gotoMatch = beforeCursor.match(/(?:^|\s)(=>)(\s*)([^\s]*)$/);
 		if (!gotoMatch) {
-			console.log('[Dialogue] ⚠️ 不在 => 上下文中');
+			console.log('[Dialogue] ⚠️ Not in a => context');
 			return [];
 		}
 
@@ -237,42 +237,42 @@ export class TitleCompletionProvider implements vscode.CompletionItemProvider {
 		const spaceAfter = gotoMatch[2];
 		const partialInput = gotoMatch[3];
 
-		console.log(`[Dialogue] 📝 操作符: "${operator}", 空格: "${spaceAfter}", 已输入: "${partialInput}"`);
+		console.log(`[Dialogue] 📝 Operator: "${operator}", spaces: "${spaceAfter}", entered: "${partialInput}"`);
 
 		const needsSpace = spaceAfter === '';
 		const prefix = needsSpace ? ' ' : '';
 
-		console.log(`[Dialogue] ${needsSpace ? '✅ 需要添加空格' : '❌ 已有空格'}`);
+		console.log(`[Dialogue] ${needsSpace ? '✅ A space is needed' : '❌ Space already present'}`);
 
 		const titles = this.titleManager.getTitles(document.uri);
 
 		const items: vscode.CompletionItem[] = [];
 
-		// 添加 END 特殊标记
+		// Add the special END markers.
 		const endItem = new vscode.CompletionItem('END', vscode.CompletionItemKind.Keyword);
-		endItem.detail = '🛑 结束对话';
-		endItem.documentation = new vscode.MarkdownString('**结束当前对话流程**');
+		endItem.detail = '🛑 End dialogue';
+		endItem.documentation = new vscode.MarkdownString('**End the current dialogue flow**');
 		endItem.insertText = `${prefix}END`;
 		endItem.sortText = '0_END';
 		items.push(endItem);
 
 		const endForceItem = new vscode.CompletionItem('END!', vscode.CompletionItemKind.Keyword);
-		endForceItem.detail = '🛑 强制结束对话';
-		endForceItem.documentation = new vscode.MarkdownString('**强制结束对话（忽略后续逻辑）**');
+		endForceItem.detail = '🛑 Force-end dialogue';
+		endForceItem.documentation = new vscode.MarkdownString('**Force-end dialogue (ignore subsequent logic)**');
 		endForceItem.insertText = `${prefix}END!`;
 		endForceItem.sortText = '0_END!';
 		items.push(endForceItem);
 
-		// ✅ 添加所有段落（带预览）
+		// ✅ Add all titles with previews.
 		for (const title of titles) {
 			const item = new vscode.CompletionItem(
 				title.fullName,
 				vscode.CompletionItemKind.Reference
 			);
 
-			// 区分本地和导入的段落
+			// Distinguish local and imported titles.
 			if (title.alias) {
-				item.detail = `📦 ${title.alias} (导入)`;
+				item.detail = `📦 ${title.alias} (imported)`;
 			} else {
 				item.detail = `📍 ${title.fullName}`;
 			}
@@ -280,24 +280,24 @@ export class TitleCompletionProvider implements vscode.CompletionItemProvider {
 			const docs: string[] = [];
 			docs.push(`### ${title.fullName}`);
 
-			// ✅ 添加预览
+			// ✅ Add the preview.
 			if (title.preview) {
 				docs.push('');
-				docs.push('**预览:** `' + title.preview + '`');
+				docs.push('**Preview:** `' + title.preview + '`');
 			}
 
 			if (title.comment) {
 				docs.push('');
-				docs.push('**说明:**');
+				docs.push('**Description:**');
 				docs.push(title.comment);
 			}
 
 			if (title.alias) {
 				docs.push('');
-				docs.push(`**来源:** \`${path.basename(title.uri.fsPath)}\``);
+				docs.push(`**Source:** \`${path.basename(title.uri.fsPath)}\``);
 			} else {
 				docs.push('');
-				docs.push(`**位置:** 第 ${title.line + 1} 行`);
+				docs.push(`**Location:** line ${title.line + 1}`);
 			}
 
 			item.documentation = new vscode.MarkdownString(docs.join('\n'));
@@ -307,12 +307,12 @@ export class TitleCompletionProvider implements vscode.CompletionItemProvider {
 			items.push(item);
 		}
 
-		console.log(`[Dialogue] 📦 返回 ${items.length} 个段落补全项`);
+		console.log(`[Dialogue] 📦 Returning ${items.length} title completion items`);
 		return items;
 	}
 }
 
-// ============ 段落悬停提示提供者 ============
+// ============ Title hover provider ============
 
 export class TitleHoverProvider implements vscode.HoverProvider {
 	constructor(private titleManager: TitleManager) { }
@@ -323,7 +323,7 @@ export class TitleHoverProvider implements vscode.HoverProvider {
 	): Promise<vscode.Hover | undefined> {
 		const line = document.lineAt(position.line).text;
 
-		// 匹配 => xxx 或 - xxx => yyy
+		// Match => xxx or - xxx => yyy.
 		const gotoMatch = line.match(/(?:^|\s)(?:=>|=)\s+([^\s]+!?)/);
 		if (!gotoMatch) return undefined;
 
@@ -340,7 +340,7 @@ export class TitleHoverProvider implements vscode.HoverProvider {
 			? titleNameWithBang.slice(0, -1)
 			: titleNameWithBang;
 
-		// 特殊处理 END 和 END!
+		// Handle END and END! specially.
 		if (titleName === 'END') {
 			const docs: string[] = [];
 
@@ -348,54 +348,54 @@ export class TitleHoverProvider implements vscode.HoverProvider {
 			docs.push('');
 
 			if (hasInstantJump) {
-				docs.push('**强制立即结束对话**');
+				docs.push('**Force-end the dialogue immediately**');
 				docs.push('');
-				docs.push('立即终止对话，跳过所有后续逻辑和清理代码。');
+				docs.push('Immediately terminate the dialogue, skipping all subsequent logic and cleanup code.');
 			} else {
-				docs.push('**结束当前对话流程**');
+				docs.push('**End the current dialogue flow**');
 				docs.push('');
-				docs.push('对话将正常结束，触发 `dialogue_ended` 信号。');
+				docs.push('The dialogue ends normally and triggers the `dialogue_ended` signal.');
 			}
 			docs.push('');
 			docs.push('---');
 			docs.push('');
-			docs.push('💡 **提示:** 这是一个特殊的内置标记，不需要定义段落');
+			docs.push('💡 **Note:** This is a special built-in marker; no title definition is required.');
 			return new vscode.Hover(new vscode.MarkdownString(docs.join('\n')));
 		}
 
-		// 查找普通段落
+		// Find a regular title.
 		const title = this.titleManager.findTitle(document.uri, titleName);
 		if (title) {
 			const docs: string[] = [];
 			docs.push(`### 📍 ${title.fullName}`);
 
 			docs.push('');
-			docs.push('**类型:** 对话段落');
+			docs.push('**Type:** Dialogue title');
 
-			// ✅ 添加预览
+			// ✅ Add the preview.
 			if (title.preview) {
 				docs.push('');
-				docs.push('**预览:** `' + title.preview + '`');
+				docs.push('**Preview:** `' + title.preview + '`');
 			}
 
 			if (title.comment) {
 				docs.push('');
-				docs.push('**说明:**');
+				docs.push('**Description:**');
 				docs.push(title.comment);
 			}
 
 			if (title.alias) {
 				docs.push('');
-				docs.push(`**来源:** \`${path.basename(title.uri.fsPath)}\` (别名: \`${title.alias}\`)`);
+				docs.push(`**Source:** \`${path.basename(title.uri.fsPath)}\` (Alias: \`${title.alias}\`)`);
 			} else {
 				docs.push('');
-				docs.push(`**位置:** 第 ${title.line + 1} 行`);
+				docs.push(`**Location:** line ${title.line + 1}`);
 			}
 
 			docs.push('');
 			docs.push('---');
 			docs.push('');
-			docs.push('💡 **提示:** 按 `Ctrl + 点击` 可跳转到定义');
+			docs.push('💡 **Note:** Use `Ctrl + Click` to navigate to the definition.');
 
 			return new vscode.Hover(new vscode.MarkdownString(docs.join('\n')));
 		}
@@ -404,7 +404,7 @@ export class TitleHoverProvider implements vscode.HoverProvider {
 	}
 }
 
-// ============ 段落定义跳转提供者（保持不变）============
+// ============ Title definition provider (unchanged) ============
 
 export class TitleDefinitionProvider implements vscode.DefinitionProvider {
 	constructor(private titleManager: TitleManager) { }
@@ -431,17 +431,17 @@ export class TitleDefinitionProvider implements vscode.DefinitionProvider {
 			: titleNameWithBang;
 
 		if (titleName === 'END') {
-			console.log(`[Dialogue] 💡 ${titleNameWithBang} 是内置标记，无需跳转`);
+			console.log(`[Dialogue] 💡 ${titleNameWithBang} is a built-in marker; no navigation needed`);
 			return undefined;
 		}
 
 		const title = this.titleManager.findTitle(document.uri, titleName);
 		if (!title) {
-			console.log(`[Dialogue] ⚠️ 未找到段落: ${titleName}`);
+			console.log(`[Dialogue] ⚠️ Title not found: ${titleName}`);
 			return undefined;
 		}
 
-		console.log(`[Dialogue] ✅ 跳转到段落: ${title.fullName} (${title.uri.fsPath}:${title.line})`);
+		console.log(`[Dialogue] ✅ Navigating to title: ${title.fullName} (${title.uri.fsPath}:${title.line})`);
 		const targetPosition = new vscode.Position(title.line, 0);
 		return new vscode.Location(title.uri, targetPosition);
 	}

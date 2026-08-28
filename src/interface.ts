@@ -1,16 +1,16 @@
-/** Godot 全局类信息 */
+/** Godot global class information */
 export interface GodotClass {
-	name: string;           // 类名
-	base: string;           // 基类
-	path: string;           // 文件路径
-	isTool: boolean;        // 是否是工具脚本
-	methods: GodotMethod[]; // 方法列表
-	properties: GodotProperty[]; // 属性列表
-	signals: string[];      // 信号列表
-	classComment?: string;  // 类级别的文档注释
+	name: string;           // Class name
+	base: string;           // Base class
+	path: string;           // File path
+	isTool: boolean;        // Whether this is a tool script
+	methods: GodotMethod[]; // Methods
+	properties: GodotProperty[]; // Properties
+	signals: string[];      // Signals
+	classComment?: string;  // Class-level documentation comment
 }
 
-/** 方法信息 */
+/** Method information */
 export interface GodotMethod {
 	name: string;
 	returnType: string;
@@ -19,35 +19,35 @@ export interface GodotMethod {
 	docComment?: string;
 }
 
-/** 方法参数信息 */
+/** Method parameter information */
 export interface GodotMethodParam {
 	name: string;
 	type: string;
-	defaultValue?: string;  // 默认值（如果存在则为可选参数）
-	fullText: string;       // 完整文本（如 "slot_id: int = 1"）
+	defaultValue?: string;  // Default value (optional when present)
+	fullText: string;       // Full text (for example "slot_id: int = 1")
 }
 
-/** 属性信息 */
+/** Property information */
 export interface GodotProperty {
 	name: string;
 	type: string;
 	isExported: boolean;
 }
 
-/** 全局变量定义（支持复杂嵌套类型） */
+/** Global variable definition (supports complex nested types) */
 export interface GlobalVariable {
-	type: string;       // 基础类型
-	comment?: string;   // 说明
-	schema?: GlobalVariableSchema;  // 新增：Dictionary 的内部结构
-	itemType?: string;  // 新增：Array 的元素类型
+	type: string;       // Base type
+	comment?: string;   // Description
+	schema?: GlobalVariableSchema;  // Dictionary internal structure
+	itemType?: string;  // Array element type
 }
 
-/** 变量结构定义（支持递归） */
+/** Variable schema definition (recursive) */
 export interface GlobalVariableSchema {
-	[key: string]: GlobalVariable;  // 递归定义，支持无限嵌套
+	[key: string]: GlobalVariable;  // Recursive definition with unlimited nesting
 }
 
-/** 全局变量配置(从 settings.json 读取) */
+/** Global variable configuration (read from settings.json) */
 export interface GlobalVariablesConfig {
 	[variableName: string]: GlobalVariable;
 }

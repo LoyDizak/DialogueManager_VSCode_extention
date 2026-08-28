@@ -97,7 +97,7 @@
     "block-mutations": {
       "patterns": [
         {
-          "comment": "控制流语句（需要冒号结尾）: if/elif/else/match/then/while",
+          "comment": "Control-flow statements (colon optional): if/elif/else/match/then/while",
           "name": "meta.block-mutation.control-flow.dialogue",
           "match": "^\\s*(if|elif|else|match|then|while)\\s+(.+?)\\s*(:?)\\s*$",
           "captures": {
@@ -117,7 +117,7 @@
           }
         },
         {
-          "comment": "else 单独一行（无条件）",
+          "comment": "else on a separate line (unconditional)",
           "name": "meta.block-mutation.else.dialogue",
           "match": "^\\s*(else)\\s*(:?)\\s*$",
           "captures": {
@@ -130,7 +130,7 @@
           }
         },
         {
-          "comment": "set 变量赋值",
+          "comment": "set variable assignment",
           "name": "meta.block-mutation.set.dialogue",
           "match": "^\\s*(set)\\s+([^=]+)(=|\\+=|-=|\\*=|/=)\\s*(.+)$",
           "captures": {
@@ -157,7 +157,7 @@
           }
         },
         {
-          "comment": "do/when 语句（无冒号）",
+          "comment": "do/when statements (no colon)",
           "name": "meta.block-mutation.do.dialogue",
           "match": "^\\s*(do!?|when)\\s+(.+)$",
           "captures": {
@@ -200,7 +200,7 @@
           }
         },
         {
-          "comment": "动态跳转: => {{expression}}",
+          "comment": "Dynamic navigation: => {{expression}}",
           "name": "meta.goto.dynamic.dialogue",
           "begin": "^\\s*(=><?)\\s*(\\{\\{)",
           "end": "(\\}\\})",
@@ -303,12 +303,12 @@
     "character-lines": {
       "patterns": [
         {
-          "comment": "随机组开始标记: % 单独一行",
+          "comment": "Random group start marker: % on its own line",
           "name": "keyword.control.random-group.dialogue",
           "match": "^\\s*(%)\\s*$"
         },
         {
-          "comment": "通用对话行（自动兼容 %、权重、角色名、纯文本）",
+          "comment": "General dialogue line (supports %, weights, speaker names, and plain text)",
           "name": "meta.character-line.dialogue",
           "begin": "^\\s*(?:(%)([0-9]*)\\s+)?(?:((?:\\{\\{[^}]+\\}\\}|[^:\\[\\]\\s{}]+))\\s*(:)\\s*)?(?=\\S)",
           "end": "$",
@@ -562,7 +562,7 @@
     "special-tags": {
       "patterns": [
         {
-          "comment": "成对的特殊标签（如 [wave]...[/wave]）",
+          "comment": "Paired special tags (for example [wave]...[/wave])",
           "name": "entity.name.tag.pair.dialogue",
           "begin": "\\[([a-zA-Z_][a-zA-Z0-9_]*)\\]",
           "end": "\\[/(\\1)\\]|$",
@@ -592,7 +592,7 @@
           ]
         },
         {
-          "comment": "带空格参数的特殊标签（如 [if expression]、[do method()]）",
+          "comment": "Special tags with space-separated arguments (for example [if expression] or [do method()])",
           "name": "entity.name.tag.special.dialogue",
           "match": "\\[(if|elif|do!?|set)\\s+([^\\]]+)\\]",
           "captures": {
@@ -613,7 +613,7 @@
           }
         },
         {
-          "comment": "带值的特殊标签（如 [wait=1]）",
+          "comment": "Special tags with values (for example [wait=1])",
           "name": "entity.name.tag.special.dialogue",
           "match": "\\[([a-zA-Z_][a-zA-Z0-9_]*)\\s*=\\s*([^\\]]+)\\]",
           "captures": {
@@ -637,7 +637,7 @@
           }
         },
         {
-          "comment": "闭合标签（如 [/if]、[/wave]）",
+          "comment": "Closing tags (for example [/if] or [/wave])",
           "name": "entity.name.tag.special.dialogue",
           "match": "\\[/([a-zA-Z_][a-zA-Z0-9_]*)\\]",
           "captures": {
@@ -647,7 +647,7 @@
           }
         },
         {
-          "comment": "简单标签（如 [else]、[pause]）",
+          "comment": "Simple tags (for example [else] or [pause])",
           "name": "entity.name.tag.special.dialogue",
           "match": "\\[([a-zA-Z_][a-zA-Z0-9_]*)\\]",
           "captures": {
@@ -710,7 +710,7 @@
     "property-access": {
       "patterns": [
         {
-          "comment": "类属性访问: ClassName.property",
+          "comment": "Class property access: ClassName.property",
           "name": "meta.property-access.class.dialogue",
           "match": "\\b([A-Z][a-zA-Z0-9_]*)\\s*(\\.)\\s*([a-zA-Z_][a-zA-Z0-9_]*)(?!\\s*\\()",
           "captures": {
@@ -726,7 +726,7 @@
           }
         },
         {
-          "comment": "实例属性访问: instance.property",
+          "comment": "Instance property access: instance.property",
           "name": "meta.property-access.instance.dialogue",
           "match": "\\b([a-z_][a-zA-Z0-9_]*)\\s*(\\.)\\s*([a-zA-Z_][a-zA-Z0-9_]*)(?!\\s*\\()",
           "captures": {
@@ -746,7 +746,7 @@
     "function-calls": {
       "patterns": [
         {
-          "comment": "类方法调用: ClassName.method()",
+          "comment": "Class method call: ClassName.method()",
           "name": "meta.function-call.with-object.dialogue",
           "begin": "\\b([A-Z][a-zA-Z0-9_]*)\\s*(\\.)\\s*([a-zA-Z_][a-zA-Z0-9_]*)\\s*(\\()",
           "end": "(\\))",
@@ -776,7 +776,7 @@
           ]
         },
         {
-          "comment": "实例方法调用: instance.method()",
+          "comment": "Instance method call: instance.method()",
           "name": "meta.function-call.with-instance.dialogue",
           "begin": "\\b([a-z_][a-zA-Z0-9_]*)\\s*(\\.)\\s*([a-zA-Z_][a-zA-Z0-9_]*)\\s*(\\()",
           "end": "(\\))",
@@ -806,7 +806,7 @@
           ]
         },
         {
-          "comment": "普通函数调用: function()",
+          "comment": "Regular function call: function()",
           "name": "meta.function-call.simple.dialogue",
           "begin": "\\b([a-z_][a-zA-Z0-9_]*)\\s*(\\()",
           "end": "(\\))",
@@ -904,7 +904,7 @@
     "tags": {
       "patterns": [
         {
-          "comment": "带参数的标签: [#tag] 或 [#tag=value] 或 [#tag1=v1,tag2=v2]",
+          "comment": "Tag with arguments: [#tag], [#tag=value], or [#tag1=v1,tag2=v2]",
           "name": "entity.name.tag.dialogue",
           "begin": "\\[(#)",
           "end": "\\]",
@@ -923,7 +923,7 @@
           },
           "patterns": [
             {
-              "comment": "标签参数: key=value",
+              "comment": "Tag argument: key=value",
               "match": "([a-zA-Z_][a-zA-Z0-9_]*)\\s*(=)\\s*([^,\\]]+)",
               "captures": {
                 "1": {
@@ -949,7 +949,7 @@
               }
             },
             {
-              "comment": "标签名（无参数）",
+              "comment": "Tag name (no arguments)",
               "name": "variable.parameter.tag-name.dialogue",
               "match": "[a-zA-Z_][a-zA-Z0-9_]*",
               "captures": {
@@ -959,7 +959,7 @@
               }
             },
             {
-              "comment": "逗号分隔符",
+              "comment": "Comma separator",
               "name": "punctuation.separator.comma.dialogue",
               "match": ","
             }

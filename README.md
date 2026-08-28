@@ -1,109 +1,109 @@
-# Godot Dialogue Manager - VSCode 扩展
+# Godot Dialogue Manager - VS Code Extension
 
 <p align="center">
   <img src="icon.png" alt="Logo" width="200"/>
 </p>
 
 <p align="center">
-  <strong>为 Godot 4.x Dialogue Manager 提供完整开发支持的 VSCode 扩展</strong>
+  <strong>A VS Code extension providing complete development support for Godot 4.x Dialogue Manager</strong>
 </p>
 
 <p align="center">
   <a href="https://github.com/hakubox/dialogue-godot-support">GitHub</a> •
-  <a href="https://github.com/hakubox/dialogue-godot-support/issues">报告问题</a> •
-  <a href="https://github.com/hakubox/dialogue-godot-support/releases">下载</a>
+  <a href="https://github.com/hakubox/dialogue-godot-support/issues">Report an issue</a> •
+  <a href="https://github.com/hakubox/dialogue-godot-support/releases">Download</a>
 </p>
 
 ---
 
-## 📖 目录
+## 📖 Contents
 
-- 核心功能 [<sup>1</sup>](#-核心功能)
-- 快速开始 [<sup>2</sup>](#-快速开始)
-- 详细功能说明 [<sup>3</sup>](#-详细功能说明)
-- 配置选项 [<sup>4</sup>](#-配置选项)
-- 使用示例 [<sup>5</sup>](#-使用示例)
-- 常见问题 [<sup>6</sup>](#-常见问题)
-- 开发与贡献 [<sup>7</sup>](#-开发与贡献)
+- Core features [<sup>1</sup>](#-core-features)
+- Quick start [<sup>2</sup>](#-quick-start)
+- Detailed features [<sup>3</sup>](#-detailed-features)
+- Configuration [<sup>4</sup>](#-configuration)
+- Examples [<sup>5</sup>](#-examples)
+- FAQ [<sup>6</sup>](#-faq)
+- Development and contributing [<sup>7</sup>](#-development-and-contributing)
 
 ---
 
-## ✨ 核心功能
+## ✨ Core Features
 
-### 🎨 **完整的语法高亮**
-- 支持 Dialogue Manager 全部语法（段落、对话、选项、条件、循环等）
-- BBCode 和内置标签高亮
-- 代码块和表达式语法着色
+### 🎨 **Complete syntax highlighting**
+- Full Dialogue Manager syntax support (titles, dialogue, choices, conditions, loops, and more)
+- BBCode and built-in tag highlighting
+- Syntax coloring for code blocks and expressions
 
-### 🧠 **智能代码补全**
-| 类型 | 说明 | 触发方式 |
+### 🧠 **Intelligent code completion**
+| Type | Description | Trigger |
 |------|------|----------|
-| **Godot 类/方法** | 自动识别项目中的全局类、AutoLoad 单例、方法、属性、信号 | 输入类名后按 `.` |
-| **段落跳转** | 本地和跨文件段落补全，支持 `END`/`END!` 关键字 | 输入 `=>` 或 `-` 后 |
-| **Import 路径** | 智能扫描工作区 `.dialogue` 文件，自动生成别名 | 输入 `import ` 后 |
-| **Dialogue 标签** | 20+ 内置标签（时间、音效、文本效果等） | 输入 `[` 后 |
-| **自定义元数据标签** | 支持自定义标签（表情、音效、特效等），可配置别名 | 输入 `[#` 后 |
+| **Godot classes/methods** | Detects global classes, AutoLoad singletons, methods, properties, and signals | Type a class name followed by `.` |
+| **Title navigation** | Local and cross-file title completion with `END`/`END!` support | Type `=>` or `-` |
+| **Import paths** | Scans workspace `.dialogue` files and generates aliases | Type `import ` |
+| **Dialogue tags** | 20+ built-in tags for timing, audio, text effects, and more | Type `[` |
+| **Custom metadata tags** | Configurable custom tags for expressions, audio, effects, and more | Type `[#` |
 
-### 🔍 **悬停提示**
-- **Godot 成员**: 显示方法签名、参数、返回值、文档注释
-- **段落引用**: 显示段落说明、来源文件、预览内容
-- **Import 路径**: 显示文件大小、段落数量
-- **标签**: 显示用途、参数说明、示例
+### 🔍 **Hover information**
+- **Godot members**: Method signatures, parameters, return values, and documentation
+- **Title references**: Title descriptions, source files, and previews
+- **Import paths**: File sizes and title counts
+- **Tags**: Purpose, parameters, and examples
 
-### 🚀 **跳转到定义**
-- `Ctrl + 点击` 跳转到 GDScript 源文件（类/方法/属性/信号）
-- 跳转到段落定义（支持跨文件）
-- 跳转到导入的 `.dialogue` 文件
+### 🚀 **Go to definition**
+- `Ctrl + Click` to jump to GDScript classes, methods, properties, and signals
+- Jump to title definitions, including across files
+- Jump to imported `.dialogue` files
 
-### 🔧 **实时诊断与快速修复**
-- 检测类名、方法名拼写错误
-- 验证参数数量和类型
-- 检测未定义的段落引用
-- 一键快速修复（拼写纠正、类型转换、参数填充）
+### 🔧 **Real-time diagnostics and quick fixes**
+- Detect misspelled class and method names
+- Validate argument counts and types
+- Detect undefined title references
+- One-click fixes for spelling, type conversion, and missing arguments
 
-### 📦 **文案导出**
-- 导出为 JSON、CSV、Markdown
-- 自动提取角色对话、旁白、选项
-- 移除 BBCode 和标签（可选保留原始文本）
-- 支持台词 ID 管理（添加/清除）
+### 📦 **Dialogue export**
+- Export to JSON, CSV, or Markdown
+- Extract character dialogue, narration, and choices
+- Remove BBCode and tags, with an option to preserve raw text
+- Manage dialogue IDs by adding or removing them
 
-### 🗂️ **代码折叠**
-- 自动折叠段落（`~ title` 到最后的 `=>`）
-- 支持 `#region` / `#endregion` 自定义区域
+### 🗂️ **Code folding**
+- Automatically fold titles from `~ title` to the final `=>`
+- Support custom `#region` / `#endregion` regions
 
 ---
 
-## 🚀 快速开始
+## 🚀 Quick Start
 
-### 1. 安装扩展
+### 1. Install the extension
 
-#### 方法 A：从 VSCode 市场安装
-1. 打开 VSCode
-2. 按 `Ctrl+Shift+X` 打开扩展面板
-3. 搜索 `Godot Dialogue Manager`
-4. 点击 **Install**
+#### Method A: Install from the VS Code Marketplace
+1. Open VS Code
+2. Press `Ctrl+Shift+X` to open the Extensions view
+3. Search for `Godot Dialogue Manager`
+4. Click **Install**
 
-#### 方法 B：手动安装 `.vsix`
-1. 从 GitHub Releases [<sup>8</sup>](https://github.com/hakubox/dialogue-godot-support/releases) 下载最新 `.vsix` 文件
-2. 在 VSCode 中按 `Ctrl+Shift+P`
-3. 输入 `Extensions: Install from VSIX...`
-4. 选择下载的 `.vsix` 文件
+#### Method B: Install manually from a `.vsix`
+1. Download the latest `.vsix` file from GitHub Releases [<sup>8</sup>](https://github.com/hakubox/dialogue-godot-support/releases)
+2. Press `Ctrl+Shift+P` in VS Code
+3. Enter `Extensions: Install from VSIX...`
+4. Select the downloaded `.vsix` file
 
-### 2. 打开 Godot 项目
-确保你的项目包含 Dialogue Manager 插件，并且有 `.dialogue` 文件。
+### 2. Open a Godot project
+Make sure your project includes the Dialogue Manager plugin and contains `.dialogue` files.
 
-### 3. 开始编写对话
-创建或打开一个 `.dialogue` 文件，输入以下内容测试：
+### 3. Start writing dialogue
+Create or open a `.dialogue` file and enter the following to test the extension:
 
 ```dialogue
 ~ start
-# 这是一个测试段落
+# This is a test title
 
-NPC: 你好！[#happy]
-Player: 你好，请问...
+NPC: Hello! [#happy]
+Player: Hello, may I ask...
 
-- 我想购买物品 => shop
-- 我要离开 => END
+- I want to buy something => shop
+- I want to leave => END
 
 ~ shop
 do! ShopManager.open_shop()
@@ -112,45 +112,45 @@ do! ShopManager.open_shop()
 
 ---
 
-## 📚 详细功能说明
+## 📚 Detailed Features
 
-### 1️⃣ **Godot 类和方法补全**
+### 1️⃣ **Godot class and method completion**
 
-#### 🔹 自动识别项目中的类
-扩展会扫描 `.godot/global_script_class_cache.cfg` 和 `project.godot`，自动识别：
-- 所有 `class_name` 定义的全局类
-- AutoLoad 单例（如 `PlayerState`、`AudioManager`）
-- 继承关系和文档注释
+#### 🔹 Automatically detect project classes
+The extension scans `.godot/global_script_class_cache.cfg` and `project.godot` to detect:
+- All global classes declared with `class_name`
+- AutoLoad singletons such as `PlayerState` and `AudioManager`
+- Inheritance relationships and documentation comments
 
-#### 🔹 智能触发
-只在以下上下文触发补全，避免干扰对话文本：
-- `do` / `do!` 语句
-- `set` 语句
-- `if` / `elif` 条件
-- `{{ }}` 插值
-- `while` / `match` / `when` 控制流
+#### 🔹 Smart triggering
+Completion is triggered only in these contexts to avoid interfering with dialogue text:
+- `do` / `do!` statements
+- `set` statements
+- `if` / `elif` conditions
+- `{{ }}` interpolation
+- `while` / `match` / `when` control flow
 
-#### 🔹 示例
+#### 🔹 Example
 
 ```dialogue
-# ✅ 补全 PlayerState 的方法
+# ✅ Complete PlayerState methods
 do PlayerState.add_gold(100)
 
-# ✅ 补全属性
+# ✅ Complete properties
 set player.health = 100
 
-# ✅ 补全 AutoLoad 单例
+# ✅ Complete AutoLoad singletons
 if AudioManager.is_playing("bgm_battle")
 	do AudioManager.stop("bgm_battle")
 endif
 
-# ✅ 插值中补全
-NPC: 你有 {{PlayerState.gold}} 金币。
+# ✅ Complete inside interpolation
+NPC: You have {{PlayerState.gold}} gold.
 ```
 
-#### 🔹 全局成员访问（无需类名前缀）
+#### 🔹 Access global members without a class prefix
 
-在 `settings.json` 中配置全局类后，可以省略类名：
+After configuring global classes in `settings.json`, you can omit the class name:
 
 ```json
 {
@@ -161,236 +161,236 @@ NPC: 你有 {{PlayerState.gold}} 金币。
 }
 ```
 
-然后可以直接写：
+You can then write:
 
 ```dialogue
-# ❌ 原来需要写
+# ❌ Previously required
 do PlayerState.add_gold(100)
 if PlayerState.gold >= 50
 
-# ✅ 配置后可以写
+# ✅ After configuration
 do add_gold(100)
 if gold >= 50
 ```
 
 ---
 
-### 2️⃣ **段落跳转补全**
+### 2️⃣ **Title navigation completion**
 
-#### 🔹 本地段落
-自动扫描当前文件的所有段落定义（`~ xxx`）：
+#### 🔹 Local titles
+The extension automatically scans all title definitions (`~ xxx`) in the current file:
 
 ```dialogue
 ~ start
-NPC: 欢迎！
+NPC: Welcome!
 
-- 开始冒险 => dungeon    # ← 补全本地段落
-- 查看商店 => shop
-- 离开 => END            # ← 内置关键字
+- Start the adventure => dungeon    # ← Complete a local title
+- Visit the shop => shop
+- Leave => END                       # ← Built-in keyword
 
 ~ dungeon
-# 地牢场景...
+# Dungeon scene...
 
 ~ shop
-# 商店场景...
+# Shop scene...
 ```
 
-#### 🔹 跨文件段落
-支持 `import` 导入的文件中的段落：
+#### 🔹 Cross-file titles
+Titles in files imported with `import` are also supported:
 
 ```dialogue
 import "res://dialogues/common.dialogue" as Common
 import "res://dialogues/chapter1.dialogue" as Ch1
 
 ~ start
-NPC: 选择一个章节：
+NPC: Choose a chapter:
 
-- 第一章 => Ch1/intro        # ← 补全 Ch1 的段落
-- 帮助 => Common/help         # ← 补全 Common 的段落
-- 返回 => start
+- Chapter one => Ch1/intro        # ← Complete a Ch1 title
+- Help => Common/help              # ← Complete a Common title
+- Return => start
 ```
 
-#### 🔹 立即跳转（`!` 后缀）
-支持 Dialogue Manager 的立即跳转语法：
+#### 🔹 Immediate navigation (the `!` suffix)
+Dialogue Manager's immediate navigation syntax is supported:
 
 ```dialogue
-- 快速跳转 => next_scene!    # 不等待当前对话显示完成
-=> END!                        # 强制立即结束
+- Quick jump => next_scene!    # Do not wait for the current dialogue to finish
+=> END!                         # Force an immediate end
 ```
 
-#### 🔹 悬停提示
+#### 🔹 Hover information
 
-悬停在段落引用上时，显示：
-- 段落名称和完整路径
-- 段落上方的注释（`#` 或 `##`）
-- **第一句对话预览**（新增）
-- 来源文件（本地或导入）
+When hovering over a title reference, the extension shows:
+- The title name and full path
+- Comments above the title (`#` or `##`)
+- **A preview of the first dialogue line**
+- The source file, local or imported
 
 ```dialogue
 ~ battle_start
-# 战斗开始
-# 玩家进入战斗区域
+# Battle begins
+# The player enters the battle area
 
-NPC: 准备战斗！
+NPC: Prepare for battle!
 
-# 悬停 => battle_start 时显示：
+# Hovering over => battle_start shows:
 # 📍 battle_start
-# **预览:** `NPC: 准备战斗！`
-# **说明:**
-# 战斗开始
-# 玩家进入战斗区域
-# **位置:** 第 10 行
+# **Preview:** `NPC: Prepare for battle!`
+# **Description:**
+# Battle begins
+# The player enters the battle area
+# **Location:** Line 10
 ```
 
 ---
 
-### 3️⃣ **Import 路径补全**
+### 3️⃣ **Import path completion**
 
-#### 🔹 自动扫描工作区
-扩展会递归扫描工作区中所有 `.dialogue` 文件，并自动生成 PascalCase 别名。
+#### 🔹 Automatically scan the workspace
+The extension recursively scans all `.dialogue` files in the workspace and generates PascalCase aliases.
 
 ```dialogue
-# 输入 import 后按空格，显示所有 .dialogue 文件
+# Type import followed by a space to show all .dialogue files
 import "res://dialogues/chapter1/intro.dialogue" as Chapter1Intro
 ```
 
-#### 🔹 目录导航
-支持逐级输入路径：
+#### 🔹 Directory navigation
+Enter paths one directory at a time:
 
 ```dialogue
-import "res://dialogues/    # ← 显示 dialogues 目录下的所有文件和子目录
-import "res://dialogues/chapter1/    # ← 显示 chapter1 目录下的文件
+import "res://dialogues/    # ← Shows all files and subdirectories in dialogues
+import "res://dialogues/chapter1/    # ← Shows files in the chapter1 directory
 ```
 
-#### 🔹 悬停提示
-悬停在 `import` 路径上时，显示：
-- 文件完整路径
-- 文件大小
-- 段落数量
-- 一键跳转
+#### 🔹 Hover information
+When hovering over an `import` path, the extension shows:
+- The full file path
+- File size
+- Title count
+- A one-click navigation link
 
 ---
 
-### 4️⃣ **Dialogue 标签补全**
+### 4️⃣ **Dialogue tag completion**
 
-#### 🔹 内置标签（20+ 个）
+#### 🔹 Built-in tags (20+)
 
-输入 `[` 后自动提示，按类别分组：
+Type `[` to show suggestions grouped by category:
 
-| 类别 | 标签 | 说明 |
+| Category | Tags | Description |
 |------|------|------|
-| **时间控制** | `[wait]`, `[speed]`, `[pause]` | 控制对话显示速度和等待时间 |
-| **音效** | `[sound]`, `[voice]` | 播放音效和语音 |
-| **文本效果** | `[wave]`, `[shake]`, `[rainbow]`, `[ghost]`, `[pulse]` | 文字动画效果 |
-| **UI 控制** | `[br]`, `[signal]`, `[next]`, `[auto]`, `[jump]` | 换行、信号、自动播放等 |
-| **BBCode** | `[b]`, `[i]`, `[u]`, `[s]`, `[color]`, `[font]`, `[size]` | 富文本格式 |
+| **Timing** | `[wait]`, `[speed]`, `[pause]` | Control dialogue speed and wait time |
+| **Audio** | `[sound]`, `[voice]` | Play sound effects and voice lines |
+| **Text effects** | `[wave]`, `[shake]`, `[rainbow]`, `[ghost]`, `[pulse]` | Text animation effects |
+| **UI control** | `[br]`, `[signal]`, `[next]`, `[auto]`, `[jump]` | Line breaks, signals, autoplay, and more |
+| **BBCode** | `[b]`, `[i]`, `[u]`, `[s]`, `[color]`, `[font]`, `[size]` | Rich-text formatting |
 
-#### 🔹 示例
+#### 🔹 Example
 
 ```dialogue
-NPC: 你好[wait=1.5]，欢迎来到这里！
-这是[wave]波浪文字[/wave]效果。
-[sound path="res://audio/coin.wav"]你获得了金币！
+NPC: Hello[wait=1.5], welcome here!
+This is a [wave]wavy text[/wave] effect.
+[sound path="res://audio/coin.wav"]You received gold!
 ```
 
-#### 🔹 智能占位符
-插入标签时自动生成占位符：
+#### 🔹 Smart placeholders
+Placeholders are generated automatically when inserting tags:
 
 ```dialogue
-[wait=|]             # 光标停在 | 位置
-[sound path="|"]     # 光标停在路径位置
-[wave]|[/wave]       # 自动闭合，光标在中间
+[wait=|]              # Cursor is placed at |
+[sound path="|"]      # Cursor is placed in the path
+[wave]|[/wave]        # Automatically closed with the cursor inside
 ```
 
 ---
 
-### 5️⃣ **自定义元数据标签**
+### 5️⃣ **Custom metadata tags**
 
-#### 🔹 配置自定义标签
+#### 🔹 Configure custom tags
 
-在 `settings.json` 中配置：
+Configure them in `settings.json`:
 
 ```json
 {
   "dialogue.diagnostics.customTags": {
     "happy": {
-      "description": "快乐表情",
-      "example": "NPC: 你好！[#happy]",
+      "description": "Happy expression",
+      "example": "NPC: Hello! [#happy]",
       "category": "face",
-      "alias": ["开心", "高兴"]
+      "alias": ["joyful", "cheerful"]
     },
     "knock_sound": {
-      "description": "敲门音效",
+      "description": "Knocking sound",
       "example": "[#knock_sound]",
       "category": "se",
-      "alias": ["敲门"]
+      "alias": ["knocking"]
     }
   },
   "dialogue.diagnostics.metadataCategories": {
     "face": {
       "icon": "😊",
-      "description": "表情"
+      "description": "Expression"
     },
     "se": {
       "icon": "🔊",
-      "description": "音效"
+      "description": "Audio"
     }
   }
 }
 ```
 
-#### 🔹 使用
+#### 🔹 Use custom tags
 
 ```dialogue
-NPC: 你好！[#happy]           # 或 [#开心]
-*敲门* [#knock_sound]         # 或 [#敲门]
+NPC: Hello! [#happy]          # or [#joyful]
+*Knock knock* [#knock_sound]  # or [#knocking]
 ```
 
-#### 🔹 管理标签
+#### 🔹 Manage tags
 
-右键菜单 → `Dialogue: 打开标签配置` 或 `Dialogue: 添加新元数据标签`
+Context menu → `Dialogue: Open Tag Settings` or `Dialogue: Add New Metadata Tag`
 
 ---
 
-### 6️⃣ **全局变量支持**
+### 6️⃣ **Global variable support**
 
-#### 🔹 配置全局变量
+#### 🔹 Configure global variables
 
-在 `settings.json` 中定义：
+Define them in `settings.json`:
 
 ```json
 {
   "dialogue.diagnostics.globalVariables": {
-    // 简单类型
+    // Simple types
     "playerName": {
       "type": "String",
-      "comment": "玩家角色名"
+      "comment": "Player character name"
     },
     "gold": {
       "type": "int",
-      "comment": "当前金币数"
+      "comment": "Current gold"
     },
     
-    // 复杂嵌套类型
+    // Complex nested types
     "playerStats": {
       "type": "Dictionary",
-      "comment": "玩家属性",
+      "comment": "Player stats",
       "schema": {
         "hp": {
           "type": "int",
-          "comment": "血量"
+          "comment": "Health"
         },
         "skills": {
           "type": "Array",
           "itemType": "String",
-          "comment": "技能列表"
+          "comment": "Skill list"
         },
         "equipment": {
           "type": "Dictionary",
-          "comment": "装备信息",
+          "comment": "Equipment",
           "schema": {
             "weapon": { "type": "String" },
-            "armor": { "type": "String?", "comment": "可选" }
+            "armor": { "type": "String?", "comment": "Optional" }
           }
         }
       }
@@ -399,87 +399,87 @@ NPC: 你好！[#happy]           # 或 [#开心]
 }
 ```
 
-#### 🔹 使用
+#### 🔹 Use global variables
 
 ```dialogue
-# ✅ 访问全局变量
+# ✅ Access a global variable
 if gold >= 100
-	NPC: 你的金币：{{gold}}
+  NPC: Your gold: {{gold}}
 endif
 
-# ✅ 访问嵌套属性
+# ✅ Access a nested property
 set playerStats.hp += 10
 if playerStats.equipment.weapon == "sword"
-	NPC: 你装备了剑！
+  NPC: You equipped a sword!
 endif
 
-# ✅ 数组操作
+# ✅ Work with an array
 if "fireball" in playerStats.skills
-	NPC: 你会火球术！
+  NPC: You know Fireball!
 endif
 ```
 
-#### 🔹 类型检查
+#### 🔹 Type checking
 
-扩展会验证：
-- 属性路径是否存在（如 `playerStats.equipment.weapon`）
-- 可选属性（`String?`）的访问
-- 数组元素类型
+The extension validates:
+- Whether property paths exist, such as `playerStats.equipment.weapon`
+- Access to optional properties (`String?`)
+- Array element types
 
 ---
 
-### 7️⃣ **实时诊断与快速修复**
+### 7️⃣ **Real-time diagnostics and quick fixes**
 
-#### 🔹 检测的错误类型
+#### 🔹 Detected error types
 
-| 错误类型 | 示例 | 快速修复 |
+| Error type | Example | Quick fix |
 |----------|------|----------|
-| **类名拼写错误** | `PlayerStat.add_gold(100)` | 建议：`PlayerState` |
-| **方法名拼写错误** | `PlayerState.add_gld(100)` | 建议：`add_gold` |
-| **参数数量错误** | `PlayerState.add_gold()` | 自动填充必需参数 |
-| **参数类型错误** | `add_gold("100")` | 转换为 `int("100")` |
-| **段落未定义** | `=> undefined_title` | 建议创建段落或纠正拼写 |
+| **Misspelled class name** | `PlayerStat.add_gold(100)` | Suggests `PlayerState` |
+| **Misspelled method name** | `PlayerState.add_gld(100)` | Suggests `add_gold` |
+| **Incorrect argument count** | `PlayerState.add_gold()` | Fills in required arguments |
+| **Incorrect argument type** | `add_gold("100")` | Converts to `int("100")` |
+| **Undefined title** | `=> undefined_title` | Suggests creating or correcting the title |
 
-#### 🔹 拼写纠正算法
-使用 **Levenshtein 编辑距离算法**，智能建议相似的类名/方法名：
+#### 🔹 Spelling correction algorithm
+The extension uses the **Levenshtein distance algorithm** to suggest similar class and method names:
 
 ```dialogue
-# ❌ 错误
+# ❌ Error
 do PlayrState.add_gold(100)
    ^^^^^^^^^
-   未找到类 'PlayrState'
+  Class not found: 'PlayrState'
 
-# 💡 快速修复建议:
-# 1. 将 'PlayrState' 改为 'PlayerState'
-# 2. 将 'PlayrState' 改为 'PlayerStat'
+# 💡 Quick-fix suggestions:
+# 1. Change 'PlayrState' to 'PlayerState'
+# 2. Change 'PlayrState' to 'PlayerStat'
 ```
 
-#### 🔹 类型转换
-自动建议类型转换：
+#### 🔹 Type conversion
+The extension automatically suggests type conversions:
 
 ```dialogue
-# ⚠️ 警告
+# ⚠️ Warning
 do PlayerState.add_gold("100")
                        ^^^^^
-   参数类型不匹配：期望 'int'，实际 'String'
+  Parameter type mismatch: expected 'int', received 'String'
 
-# 💡 快速修复:
-# 转换为 int 类型: int("100")
+# 💡 Quick fix:
+# Convert to int: int("100")
 ```
 
 ---
 
-### 8️⃣ **文案导出**
+### 8️⃣ **Dialogue export**
 
-#### 🔹 导出格式
+#### 🔹 Export formats
 
-右键菜单 → `Dialogue: 导出文案`，支持：
-- **JSON（格式化）**: 适合阅读和编辑
-- **JSON（紧凑）**: 适合程序读取
-- **CSV**: 可用 Excel 打开
-- **Markdown**: 表格格式
+Context menu → `Dialogue: Export Dialogue`, with support for:
+- **JSON (Pretty)**: Easy to read and edit
+- **JSON (Compact)**: Suitable for programmatic use
+- **CSV**: Can be opened in Excel
+- **Markdown**: Table format
 
-#### 🔹 导出内容
+#### 🔹 Exported content
 
 ```json
 [
@@ -487,8 +487,8 @@ do PlayerState.add_gold("100")
     "id": "DLG_0001",
     "type": "character",
     "speaker": "NPC",
-    "text": "你好，欢迎！",
-    "rawText": "你好，[wave]欢迎[/wave]！[#happy]",
+    "text": "Hello, welcome!",
+    "rawText": "Hello, [wave]welcome[/wave]! [#happy]",
     "line": 5,
     "tags": ["happy"],
     "hasInlineCode": false
@@ -496,8 +496,8 @@ do PlayerState.add_gold("100")
   {
     "id": "DLG_0002",
     "type": "narration",
-    "text": "这是一段旁白。",
-    "rawText": "这是一段旁白。",
+    "text": "This is a narration line.",
+    "rawText": "This is a narration line.",
     "line": 6,
     "tags": [],
     "hasInlineCode": false
@@ -505,46 +505,46 @@ do PlayerState.add_gold("100")
 ]
 ```
 
-#### 🔹 台词 ID 管理
+#### 🔹 Dialogue ID management
 
-右键菜单 → `Dialogue: 为所有台词添加 ID`
+Context menu → `Dialogue: Add IDs to All Dialogue Lines`
 
 ```dialogue
-# 自动添加 ID
-NPC: 你好！ [ID:A1B2C3D4E5F6]
-Player: 你好。 [ID:123456789ABC]
+# IDs added automatically
+NPC: Hello! [ID:A1B2C3D4E5F6]
+Player: Hello. [ID:123456789ABC]
 
-# 清除 ID
-右键菜单 → `Dialogue: 清除所有台词 ID`
+# Remove IDs
+Context menu → `Dialogue: Remove All Dialogue IDs`
 ```
 
 ---
 
-### 9️⃣ **代码折叠**
+### 9️⃣ **Code folding**
 
-#### 🔹 自动折叠段落
-从 `~ title` 折叠到最后的 `=>`：
+#### 🔹 Automatically fold titles
+Fold from `~ title` to the final `=>`:
 
 ```dialogue
-~ start         # ← 点击折叠图标
-NPC: 你好！
-- 选项1 => a
-- 选项2 => b
-=> END          # ← 折叠到这里
+~ start         # ← Click the folding icon
+NPC: Hello!
+- Choice 1 => a
+- Choice 2 => b
+=> END          # ← Fold to here
 ```
 
-#### 🔹 自定义区域
-使用 `#region` / `#endregion`：
+#### 🔹 Custom regions
+Use `#region` / `#endregion`:
 
 ```dialogue
-#region 第一章对话
+#region Chapter one dialogue
 ~ intro
 ...
 ~ ending
 ...
 #endregion
 
-#region 战斗对话
+#region Battle dialogue
 ~ battle_start
 ...
 #endregion
@@ -552,24 +552,24 @@ NPC: 你好！
 
 ---
 
-## ⚙️ 配置选项
+## ⚙️ Configuration
 
-### 完整配置示例
+### Complete configuration example
 
 ```json
 {
-  // ========== 全局类配置 ==========
+  // ========== Global class configuration ==========
   "dialogue.diagnostics.globalClasses": [
     "PlayerState",
     "AudioManager",
     "SaveManager"
   ],
 
-  // ========== 全局变量配置 ==========
+  // ========== Global variable configuration ==========
   "dialogue.diagnostics.globalVariables": {
     "playerName": {
       "type": "String",
-      "comment": "玩家名"
+      "comment": "Player name"
     },
     "playerStats": {
       "type": "Dictionary",
@@ -580,79 +580,79 @@ NPC: 你好！
     }
   },
 
-  // ========== 自定义标签配置 ==========
+  // ========== Custom tag configuration ==========
   "dialogue.diagnostics.customTags": {
     "happy": {
-      "description": "快乐表情",
+      "description": "Happy expression",
       "category": "face",
-      "alias": ["开心"]
+      "alias": ["joyful"]
     }
   },
 
-  // ========== 标签分类配置 ==========
+  // ========== Tag category configuration ==========
   "dialogue.diagnostics.metadataCategories": {
     "face": {
       "icon": "😊",
-      "description": "表情"
+      "description": "Expression"
     }
   },
 
-  // ========== 其他选项 ==========
+  // ========== Other options ==========
   "dialogue.diagnostics.enableCustomTags": true,
   "dialogue.diagnostics.strictMode": false
 }
 ```
 
-## ❓ 常见问题
+## ❓ FAQ
 
-### Q1: 补全列表中没有我的类？
-**A**: 确保你的类使用了 `class_name` 声明：
+### Q1: Why is my class missing from the completion list?
+**A**: Make sure your class uses a `class_name` declaration:
 
 ```gdscript
-# ✅ 正确
+# ✅ Correct
 class_name PlayerState
 extends Node
 
-# ❌ 错误
+# ❌ Incorrect
 extends Node
 ```
 
-或者将类在全局挂载，然后重启 VSCode 或等待类缓存刷新。
+Alternatively, register the class globally, then restart VS Code or wait for the class cache to refresh.
 
 ---
 
-### Q2: 跨文件段落补全不生效？
-**A**: 确保：
-1. `import` 语句正确（路径使用 `res://`）
-2. 打开过导入的 `.dialogue` 文件（触发扫描）
-3. 导入的文件中存在 `~ xxx` 段落定义
+### Q2: Why is cross-file title completion not working?
+**A**: Make sure that:
+1. The `import` statement is correct and uses a `res://` path
+2. The imported `.dialogue` file has been opened to trigger scanning
+3. The imported file contains a `~ xxx` title definition
 
 ---
 
-### Q3: 如何禁用某些检查？
-**A**: 在 `settings.json` 中设置：
+### Q3: How can I disable specific checks?
+**A**: Set the option in `settings.json`:
 
 ```json
 {
-  "dialogue.diagnostics.strictMode": false  // 禁用严格模式
+  "dialogue.diagnostics.strictMode": false  // Disable strict mode
 }
 ```
 
 ---
 
-### Q4: 私有成员（`_` 开头）不显示？
-**A**: 这是预期行为，符合 GDScript 的可见性规则。如果需要访问私有成员，直接输入完整名称即可（不会自动补全）。
+### Q4: Why are private members (starting with `_`) not displayed?
+**A**: This is expected and follows GDScript visibility rules. To access a private member, enter its full name manually; it will not be completed automatically.
 
 ---
 
-### Q5: 首次打开项目时补全很慢？
-**A**: 扩展需要扫描所有 GDScript 文件构建类缓存，通常需要 2-5 秒。等待控制台输出 `✅ 类缓存初始化完成` 后即可正常使用。
+### Q5: Why is completion slow when opening a project for the first time?
+**A**: The extension scans all GDScript files to build the class cache, which usually takes 2-5 seconds. Wait for `✅ Class cache initialization complete` in the console before using completion.
 
 ---
 
-## 🛠️ 开发与贡献
+## 🛠️ Development and Contributing
 
-### 环境设置
+### Setup
 
 ```bash
 git clone https://github.com/hakubox/dialogue-godot-support.git
@@ -660,35 +660,35 @@ cd dialogue-godot-support
 npm install
 ```
 
-### 调试
+### Debugging
 
-1. 在 VSCode 中打开项目
-2. 按 `F5` 启动扩展开发主机
-3. 在新窗口中打开 Godot 项目测试
+1. Open the project in VS Code
+2. Press `F5` to launch the Extension Development Host
+3. Open a Godot project in the new window and test the extension
 
-### 打包
+### Packaging
 
 ```bash
 npm run package
-# 生成 dist/dialogue-godot-support-x.x.x.vsix
+# Generates dist/dialogue-godot-support-x.x.x.vsix
 ```
 
-### 贡献指南
+### Contributing
 
-欢迎提交 Issue 和 Pull Request！请确保：
-- 代码符合 TypeScript 规范
-- 添加必要的注释
-- 测试新功能
-
----
-
-## 📄 许可证
-
-MIT License - 详见 LICENSE [<sup>9</sup>](LICENSE) 文件
+Issues and pull requests are welcome. Please make sure to:
+- Follow TypeScript conventions
+- Add necessary comments
+- Test new features
 
 ---
 
-## 🙏 致谢
+## 📄 License
+
+MIT License - See the LICENSE [<sup>9</sup>](LICENSE) file for details
+
+---
+
+## 🙏 Acknowledgements
 
 - Godot Engine [<sup>10</sup>](https://godotengine.org/)
 - Dialogue Manager Plugin [<sup>11</sup>](https://github.com/nathanhoad/godot_dialogue_manager) by Nathan Hoad
@@ -696,14 +696,14 @@ MIT License - 详见 LICENSE [<sup>9</sup>](LICENSE) 文件
 
 ---
 
-## 📧 联系方式
+## 📧 Contact
 
-- **GitHub Issues**: 提交问题 [<sup>13</sup>](https://github.com/hakubox/dialogue-godot-support/issues)
-- **作者**: hakubox
-- **邮箱**: hakubox@outlook.com
+- **GitHub Issues**: Submit an issue [<sup>13</sup>](https://github.com/hakubox/dialogue-godot-support/issues)
+- **Author**: hakubox
+- **Email**: hakubox@outlook.com
 
 ---
 
 <p align="center">
-  <strong>如果这个扩展对你有帮助，请给个 ⭐️ Star！</strong>
+  <strong>If this extension helps you, please give it a ⭐️ Star!</strong>
 </p>

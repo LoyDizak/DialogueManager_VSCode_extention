@@ -3,7 +3,7 @@
 import * as vscode from 'vscode';
 
 /**
- * Dialogue Manager 标签定义（统一接口）
+ * Dialogue Manager tag definition (shared interface)
  */
 export interface DialogueTag {
 	name: string;
@@ -20,110 +20,110 @@ export interface DialogueTag {
 }
 
 /**
- * 元数据分类配置接口
+ * Metadata category configuration interface
  */
 export interface MetadataCategory {
 	icon: string;
 	description: string;
 }
 
-// ============ 关键词定义 (用于悬停提示) ============
+// ============ Keyword definitions (for hover information) ============
 const DIALOGUE_KEYWORDS: Record<string, {
 	description: string;
 	example: string;
-	inlineDescription?: string;  // ✅ 新增：行内用法的描述
-	inlineExample?: string;      // ✅ 新增：行内用法的示例
+	inlineDescription?: string;  // ✅ Inline usage description
+	inlineExample?: string;      // ✅ Inline usage example
 }> = {
-	'~': { description: '定义一个对话段落的开始（标题）。', example: '~ start' },
-	'-': { description: '定义一个对话选项', example: '- 选项1\n- 选项2' },
-	'=>': { description: '跳转到指定的对话标题。', example: '=> next_scene\n=> END!' },
+	'~': { description: 'Defines the start of a dialogue title.', example: '~ start' },
+	'-': { description: 'Defines a dialogue choice.', example: '- Choice 1\n- Choice 2' },
+	'=>': { description: 'Jumps to the specified dialogue title.', example: '=> next_scene\n=> END!' },
 
-	// ✅ do 关键词：区分行首和行内
+	// ✅ do keyword: distinguish line-start and inline usage
 	'do': {
-		description: '（行首）执行一个 Godot 表达式或方法，不阻塞对话流程。',
+		description: '(At line start) Executes a Godot expression or method without blocking the dialogue flow.',
 		example: 'do PlayerState.add_gold(100)\ndo queue_free()',
-		inlineDescription: '（行内）在对话文本中执行表达式，立即生效。',
-		inlineExample: '张三: 你好[do SaveManager.save()]，我现在存档了。'
+		inlineDescription: '(Inline) Executes an expression in dialogue text immediately.',
+		inlineExample: 'NPC: Hello[do SaveManager.save()], the game is saved.'
 	},
 
-	// ✅ do! 关键词
+	// ✅ do! keyword
 	'do!': {
-		description: '（行首）执行表达式并等待其完成（如果返回信号）。',
+		description: '(At line start) Executes an expression and waits for it to finish when it returns a signal.',
 		example: 'do! play_animation("cutscene")',
-		inlineDescription: '（行内）执行并等待完成，会暂停对话显示。',
-		inlineExample: '张三: 看这个[do! show_effect()]效果！'
+		inlineDescription: '(Inline) Executes and waits for completion, pausing dialogue display.',
+		inlineExample: 'NPC: Look at this [do! show_effect()] effect!'
 	},
 
-	// ✅ set 关键词：区分行首和行内
+	// ✅ set keyword: distinguish line-start and inline usage
 	'set': {
-		description: '（行首）修改变量或属性的值。',
+		description: '(At line start) Changes the value of a variable or property.',
 		example: 'set player.health = 100\nset score += 50',
-		inlineDescription: '（行内）在对话文本中修改变量，立即生效。',
-		inlineExample: '你获得了 100 金币[set player.gold += 100]！'
+		inlineDescription: '(Inline) Changes a variable in dialogue text immediately.',
+		inlineExample: 'You received 100 gold[set player.gold += 100]!'
 	},
 
-	'if': { description: '当条件为真时，执行下方缩进的块。', example: 'if count < 3:' },
-	'elif': { description: '当条件为真时，执行下方缩进的块。', example: 'elif count < 3:' },
-	'else': { description: '当其他条件全为假时，执行下方缩进的块。', example: 'else:' },
-	'while': { description: '当条件为真时，重复执行下方缩进的块。', example: 'while count < 3:' },
-	'match': { description: '根据表达式的值执行对应的 when 分支。', example: 'match player_class:' },
-	'when': { description: 'match 语句的具体条件分支。', example: 'when warrior:' },
-	'{{': { description: '变量插值开始，嵌入 Godot 表达式。', example: '你有 {{gold}} 金币。' },
-	'}}': { description: '变量插值结束。', example: '你有 {{gold}} 金币。' },
-	'%': { description: '随机选项的权重（如 %2 概率是 %1 的两倍）。', example: '% 结果1。\n%2 结果2。\n%2 结果3。' }
+	'if': { description: 'Executes the indented block when the condition is true.', example: 'if count < 3:' },
+	'elif': { description: 'Executes the indented block when the condition is true.', example: 'elif count < 3:' },
+	'else': { description: 'Executes the indented block when all other conditions are false.', example: 'else:' },
+	'while': { description: 'Repeats the indented block while the condition is true.', example: 'while count < 3:' },
+	'match': { description: 'Executes the matching when branch for the expression value.', example: 'match player_class:' },
+	'when': { description: 'A specific condition branch of a match statement.', example: 'when warrior:' },
+	'{{': { description: 'Starts variable interpolation with an embedded Godot expression.', example: 'You have {{gold}} gold.' },
+	'}}': { description: 'Ends variable interpolation.', example: 'You have {{gold}} gold.' },
+	'%': { description: 'Weight for a random choice (%2 is twice as likely as %1).', example: '% Result 1.\n%2 Result 2.\n%2 Result 3.' }
 };
 
-// ============ 常规标签定义 ============
+// ============ Built-in tag definitions ============
 export const DIALOGUE_TAGS: DialogueTag[] = [
-	// ============ 行内动作标签（新增分类）============
-	// ✅ 行内 do 标签
+	// ============ Inline action tags ============
+	// ✅ Inline do tag
 	{
 		name: 'do',
 		hasValue: true,
 		valueType: 'expression',
-		valueHint: 'Godot 表达式（如 SaveManager.save()）',
+		valueHint: 'Godot expression (for example SaveManager.save())',
 		isPair: false,
-		description: '在对话文本中执行表达式，不阻塞对话流程',
-		example: '张三: 你好[do SaveManager.save()]，我现在存档了。',
+		description: 'Execute an expression in dialogue text without blocking the dialogue flow',
+		example: 'NPC: Hello[do SaveManager.save()], the game is saved.',
 		category: 'action',
-		isInline: true  // ✅ 标记为行内标签
+		isInline: true  // ✅ Mark as an inline tag
 	},
 
-	// ✅ 行内 do! 标签
+	// ✅ Inline do! tag
 	{
 		name: 'do!',
 		hasValue: true,
 		valueType: 'expression',
-		valueHint: 'Godot 表达式（返回信号）',
+		valueHint: 'Godot expression (returns a signal)',
 		isPair: false,
-		description: '执行表达式并等待完成，会暂停对话显示',
-		example: '张三: 看这个[do! show_effect()]效果！',
+		description: 'Execute an expression and wait for completion, pausing dialogue display',
+		example: 'NPC: Look at this [do! show_effect()] effect!',
 		category: 'action',
 		isInline: true
 	},
 
-	// ✅ 行内 set 标签
+	// ✅ Inline set tag
 	{
 		name: 'set',
 		hasValue: true,
 		valueType: 'expression',
-		valueHint: 'gold += 100',
+		valueHint: 'Change a variable value in dialogue text',
 		isPair: false,
-		description: '在对话文本中修改变量值',
-		example: '你获得了 100 金币[set gold += 100]！',
+		description: 'Change a variable value in dialogue text',
+		example: 'You received 100 gold[set gold += 100]!',
 		category: 'action',
 		isInline: true
 	},
 
-	// ============ 条件控制 ============
+	// ============ Conditional control ============
 	{
 		name: 'if',
 		hasValue: true,
 		valueType: 'expression',
 		valueHint: 'has_key',
 		isPair: true,
-		description: '条件判断开始，如果表达式为真则执行',
-		example: '[if player.has_key] 你有钥匙 [/if]',
+		description: 'Start a conditional block and execute it when the expression is true',
+		example: '[if player.has_key] You have a key [/if]',
 		category: 'ui',
 		isInline: true
 	},
@@ -133,8 +133,8 @@ export const DIALOGUE_TAGS: DialogueTag[] = [
 		valueType: 'expression',
 		valueHint: 'has_key',
 		isPair: false,
-		description: '条件判断的 else if 分支',
-		example: '[if score > 100] 优秀 [elif score > 60] 及格 [else] 不及格 [/if]',
+		description: 'The else-if branch of a conditional block',
+		example: '[if score > 100] Excellent [elif score > 60] Passing [else] Failing [/if]',
 		category: 'ui',
 		isInline: true
 	},
@@ -142,20 +142,20 @@ export const DIALOGUE_TAGS: DialogueTag[] = [
 		name: 'else',
 		hasValue: false,
 		isPair: false,
-		description: '行内条件判断的 else 分支（必须在 [if] 和 [/if] 之间）',
-		example: '[if player.has_key] 你有钥匙 [else] 你没有钥匙 [/if]',
+		description: 'The inline else branch (must appear between [if] and [/if])',
+		example: '[if player.has_key] You have a key [else] You do not have a key [/if]',
 		category: 'ui',
 		isInline: true
 	},
 
-	// ============ 时间控制 ============
+	// ============ Timing control ============
 	{
 		name: 'wait',
 		hasValue: true,
 		valueType: 'number',
-		valueHint: '秒数（支持小数）',
+		valueHint: 'Seconds (decimals supported)',
 		isPair: false,
-		description: '暂停指定秒数后继续',
+		description: 'Pause for the specified number of seconds, then continue',
 		example: '[wait=1.5]',
 		category: 'time',
 		isInline: true
@@ -164,9 +164,9 @@ export const DIALOGUE_TAGS: DialogueTag[] = [
 		name: 'speed',
 		hasValue: true,
 		valueType: 'number',
-		valueHint: '速度倍率（1.0为正常）',
+		valueHint: 'Speed multiplier (1.0 is normal)',
 		isPair: false,
-		description: '设置文字显示速度',
+		description: 'Set the text display speed',
 		example: '[speed=2.0]',
 		category: 'time',
 		isInline: true
@@ -175,7 +175,7 @@ export const DIALOGUE_TAGS: DialogueTag[] = [
 		name: 'pause',
 		hasValue: false,
 		isPair: false,
-		description: '暂停，等待玩家按键继续',
+		description: 'Pause and wait for the player to press a key',
 		example: '[pause]',
 		category: 'time',
 		isInline: true
@@ -184,20 +184,20 @@ export const DIALOGUE_TAGS: DialogueTag[] = [
 		name: 'p',
 		hasValue: false,
 		isPair: false,
-		description: '暂停的简写形式',
+		description: 'Short form of pause',
 		example: '[p]',
 		category: 'time',
 		isInline: true
 	},
 
-	// ============ 音效 ============
+	// ============ Audio ============
 	{
 		name: 'sound',
 		hasValue: true,
 		valueType: 'path',
-		valueHint: 'res://路径/音效.ogg',
+		valueHint: 'res://path/to/sound.ogg',
 		isPair: false,
-		description: '播放音效文件',
+		description: 'Play a sound-effect file',
 		example: '[sound=res://audio/sfx/click.ogg]',
 		category: 'audio',
 		isInline: true
@@ -206,21 +206,21 @@ export const DIALOGUE_TAGS: DialogueTag[] = [
 		name: 'voice',
 		hasValue: true,
 		valueType: 'path',
-		valueHint: 'res://路径/语音.ogg',
+		valueHint: 'res://path/to/voice.ogg',
 		isPair: false,
-		description: '播放角色语音',
+		description: 'Play a character voice line',
 		example: '[voice=res://audio/voice/line_001.ogg]',
 		category: 'audio',
 		isInline: true
 	},
 
-	// ============ 文本效果 ============
+	// ============ Text effects ============
 	{
 		name: 'wave',
 		hasValue: false,
 		isPair: true,
-		description: '文字波浪效果',
-		example: '[wave]波浪文字[/wave]',
+		description: 'Wavy text effect',
+		example: '[wave]Wavy text[/wave]',
 		category: 'effect',
 		isInline: true
 	},
@@ -228,8 +228,8 @@ export const DIALOGUE_TAGS: DialogueTag[] = [
 		name: 'shake',
 		hasValue: false,
 		isPair: true,
-		description: '文字震动效果',
-		example: '[shake]震动文字[/shake]',
+		description: 'Shaking text effect',
+		example: '[shake]Shaking text[/shake]',
 		category: 'effect',
 		isInline: true
 	},
@@ -237,8 +237,8 @@ export const DIALOGUE_TAGS: DialogueTag[] = [
 		name: 'rainbow',
 		hasValue: false,
 		isPair: true,
-		description: '彩虹渐变效果',
-		example: '[rainbow]彩虹文字[/rainbow]',
+		description: 'Rainbow gradient effect',
+		example: '[rainbow]Rainbow text[/rainbow]',
 		category: 'effect',
 		isInline: true
 	},
@@ -246,8 +246,8 @@ export const DIALOGUE_TAGS: DialogueTag[] = [
 		name: 'ghost',
 		hasValue: false,
 		isPair: true,
-		description: '幽灵渐隐效果',
-		example: '[ghost]幽灵文字[/ghost]',
+		description: 'Ghost fade effect',
+		example: '[ghost]Ghost text[/ghost]',
 		category: 'effect',
 		isInline: true
 	},
@@ -255,19 +255,19 @@ export const DIALOGUE_TAGS: DialogueTag[] = [
 		name: 'pulse',
 		hasValue: false,
 		isPair: true,
-		description: '脉冲缩放效果',
-		example: '[pulse]脉冲文字[/pulse]',
+		description: 'Pulsing scale effect',
+		example: '[pulse]Pulsing text[/pulse]',
 		category: 'effect',
 		isInline: true
 	},
 
-	// ============ UI 控制 ============
+	// ============ UI control ============
 	{
 		name: 'b',
 		hasValue: false,
 		isPair: true,
-		description: '文字加粗',
-		example: '[b]文字加粗[/b]',
+		description: 'Bold text',
+		example: '[b]Bold text[/b]',
 		category: 'ui',
 		isInline: true
 	},
@@ -275,7 +275,7 @@ export const DIALOGUE_TAGS: DialogueTag[] = [
 		name: 'br',
 		hasValue: false,
 		isPair: false,
-		description: '强制换行',
+		description: 'Force a line break',
 		example: '[br]',
 		category: 'ui',
 		isInline: true
@@ -284,9 +284,9 @@ export const DIALOGUE_TAGS: DialogueTag[] = [
 		name: 'signal',
 		hasValue: true,
 		valueType: 'string',
-		valueHint: '信号名',
+		valueHint: 'Signal name',
 		isPair: false,
-		description: '发送自定义信号',
+		description: 'Send a custom signal',
 		example: '[signal=player_choice]',
 		category: 'ui',
 		isInline: true
@@ -295,9 +295,9 @@ export const DIALOGUE_TAGS: DialogueTag[] = [
 		name: 'next',
 		hasValue: true,
 		valueType: 'string',
-		valueHint: '场景ID',
+		valueHint: 'Scene ID',
 		isPair: false,
-		description: '跳转到下一个场景',
+		description: 'Navigate to the next scene',
 		example: '[next=chapter_2]',
 		category: 'ui',
 		isInline: true
@@ -306,7 +306,7 @@ export const DIALOGUE_TAGS: DialogueTag[] = [
 		name: 'auto',
 		hasValue: false,
 		isPair: false,
-		description: '开启自动播放模式',
+		description: 'Enable autoplay mode',
 		example: '[auto]',
 		category: 'ui',
 		isInline: true
@@ -315,9 +315,9 @@ export const DIALOGUE_TAGS: DialogueTag[] = [
 		name: 'jump',
 		hasValue: true,
 		valueType: 'string',
-		valueHint: '标题名',
+		valueHint: 'Title name',
 		isPair: false,
-		description: '立即跳转到指定标题',
+		description: 'Immediately navigate to the specified title',
 		example: '[jump=next_scene]',
 		category: 'ui',
 		isInline: true
@@ -325,12 +325,12 @@ export const DIALOGUE_TAGS: DialogueTag[] = [
 ];
 
 /**
- * 注册标签相关功能
+ * Register tag-related features.
  */
 export function registerTagFeatures(context: vscode.ExtensionContext): void {
-	console.log('[Dialogue] 📦 注册标签功能...');
+	console.log('[Dialogue] 📦 Registering tag features...');
 
-	// 注册统一的标签补全和悬停提供者
+	// Register unified tag completion and hover providers.
 	context.subscriptions.push(
 		vscode.languages.registerCompletionItemProvider(
 			{ scheme: 'file', language: 'dialogue' },
@@ -346,7 +346,7 @@ export function registerTagFeatures(context: vscode.ExtensionContext): void {
 		)
 	);
 
-	// 注册标签配置命令
+	// Register tag configuration commands.
 	const tagConfigManager = TagConfigManager.getInstance();
 
 	context.subscriptions.push(
@@ -361,11 +361,11 @@ export function registerTagFeatures(context: vscode.ExtensionContext): void {
 		})
 	);
 
-	console.log('[Dialogue] 标签功能注册完成');
+	console.log('[Dialogue] Tag features registered');
 }
 
 /**
- * 标签配置管理器（统一管理常规标签和自定义元数据标签）
+ * Tag configuration manager (handles built-in and custom metadata tags).
  */
 export class TagConfigManager {
 	private static instance: TagConfigManager;
@@ -378,12 +378,12 @@ export class TagConfigManager {
 	private constructor() {
 		this.loadConfiguration();
 
-		// 监听配置变化
+		// Listen for configuration changes.
 		vscode.workspace.onDidChangeConfiguration(event => {
 			if (event.affectsConfiguration('dialogue.diagnostics.customTags') ||
 				event.affectsConfiguration('dialogue.diagnostics.enableCustomTags') ||
 				event.affectsConfiguration('dialogue.diagnostics.metadataCategories')) {
-				console.log('[Dialogue] 🔄 配置已更新，重新加载');
+				console.log('[Dialogue] 🔄 Configuration updated; reloading');
 				this.loadConfiguration();
 			}
 		});
@@ -397,13 +397,13 @@ export class TagConfigManager {
 	}
 
 	/**
-	 * 加载配置（合并常规标签和自定义标签）
+	 * Load configuration (combining built-in and custom tags).
 	 */
 	private loadConfiguration(): void {
 		this.allTags.clear();
 		this.metadataCategories.clear();
 
-		// ✅ 1. 加载所有常规标签
+		// ✅ 1. Load all built-in tags.
 		for (const tag of DIALOGUE_TAGS) {
 			this.allTags.set(tag.name, tag);
 		}
@@ -411,18 +411,18 @@ export class TagConfigManager {
 		const config = vscode.workspace.getConfiguration('dialogue');
 		this.enabled = config.get<boolean>('enableCustomTags', true);
 		if (!this.enabled) {
-			console.log('[Dialogue] ⚠️ 自定义标签已禁用');
+			console.log('[Dialogue] ⚠️ Custom tags are disabled');
 			return;
 		}
 
-		// ✅ 2. 加载元数据分类配置
+		// ✅ 2. Load metadata category configuration.
 		const categoriesConfig = config.get<Record<string, MetadataCategory>>('diagnostics.metadataCategories', {});
 		for (const [categoryKey, categoryConfig] of Object.entries(categoriesConfig)) {
 			this.metadataCategories.set(categoryKey, categoryConfig);
 		}
-		console.log(`[Dialogue] ✅ 已加载 ${this.metadataCategories.size} 个元数据分类`);
+		console.log(`[Dialogue] ✅ Loaded ${this.metadataCategories.size} metadata categories`);
 
-		// ✅ 3. 加载用户自定义的元数据标签
+		// ✅ 3. Load user-defined metadata tags.
 		const customTagsConfig = config.get<Record<string, {
 			description: string;
 			example?: string;
@@ -447,83 +447,83 @@ export class TagConfigManager {
 			}
 			this.allTags.set(tagName, metadataTag);
 
-			// ✅ 构建别名映射
+			// ✅ Build the alias map.
 			if (tagConfig.aliases && tagConfig.aliases.length > 0) {
 				for (const alias of tagConfig.aliases) {
 					this.aliasToTag.set(alias, tagName);
-					console.log(`[Dialogue] 📝 注册别名: "${alias}" -> "${tagName}"`);
+					console.log(`[Dialogue] 📝 Registered alias: "${alias}" -> "${tagName}"`);
 				}
 			}
 		}
 
-		console.log(`[Dialogue] ✅ 已加载 ${this.allTags.size} 个标签`);
+		console.log(`[Dialogue] ✅ Loaded ${this.allTags.size} tags`);
 	}
 
 
 	/**
-	 * ✅ 新增：根据别名获取真实标签名
+	 * ✅ Added: resolve the canonical tag name from an alias.
 	 */
 	public resolveAlias(aliasOrTagName: string): string {
 		return this.aliasToTag.get(aliasOrTagName) || aliasOrTagName;
 	}
 	/**
-	 * ✅ 新增：获取标签的所有别名
+	 * ✅ Added: get all aliases for a tag.
 	 */
 	public getAliases(tagName: string): string[] {
 		const tag = this.allTags.get(tagName);
 		return tag?.alias || [];
 	}
 	/**
-	 * ✅ 新增：检查字符串是否是某个标签的别名
+	 * ✅ Added: check whether a string is an alias.
 	 */
 	public isAlias(text: string): boolean {
 		return this.aliasToTag.has(text);
 	}
 
 	/**
-	 * 获取元数据标签的分类信息
+	 * Get metadata category information.
 	 */
 	public getMetadataCategory(categoryKey: string): MetadataCategory | undefined {
 		return this.metadataCategories.get(categoryKey);
 	}
 
 	/**
-	 * 获取所有元数据分类
+	 * Get all metadata categories.
 	 */
 	public getAllMetadataCategories(): Map<string, MetadataCategory> {
 		return this.metadataCategories;
 	}
 
 	/**
-	 * 获取所有标签
+	 * Get all tags.
 	 */
 	public getAllTags(): Map<string, DialogueTag> {
 		return this.allTags;
 	}
 
 	/**
-	 * 获取单个标签
+	 * Get a single tag.
 	 */
 	public getTag(tagName: string): DialogueTag | undefined {
 		return this.allTags.get(tagName);
 	}
 
 	/**
-	 * 按分类获取标签
+	 * Get tags by category.
 	 */
 	public getTagsByCategory(category: DialogueTag['category']): DialogueTag[] {
 		return Array.from(this.allTags.values()).filter(tag => tag.category === category);
 	}
 
 	/**
-	 * 是否启用自定义标签
+	 * Check whether custom tags are enabled.
 	 */
 	public isEnabled(): boolean {
 		return this.enabled;
 	}
 
 	/**
-	 * 打开配置文件
+	 * Open the configuration.
 	 */
 	public async openSettings(): Promise<void> {
 		await vscode.commands.executeCommand(
@@ -533,19 +533,19 @@ export class TagConfigManager {
 	}
 
 	/**
-	 * 添加新的元数据标签
+	 * Add a new metadata tag.
 	 */
 	public async addNewTag(): Promise<void> {
 		const tagName = await vscode.window.showInputBox({
-			prompt: '输入标签名称（不含 # 号）',
-			placeHolder: '例如: happy',
+			prompt: 'Enter a tag name (without the # symbol)',
+			placeHolder: 'For example: happy',
 			validateInput: (value) => {
-				if (!value) return '标签名称不能为空';
+				if (!value) return 'Tag name cannot be empty';
 				if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(value)) {
-					return '标签名称只能包含字母、数字和下划线，且不能以数字开头';
+					return 'Tag names may contain only letters, numbers, and underscores, and cannot start with a number';
 				}
 				if (this.allTags.has(value)) {
-					return '标签已存在';
+					return 'Tag already exists';
 				}
 				return null;
 			}
@@ -554,16 +554,16 @@ export class TagConfigManager {
 		if (!tagName) return;
 
 		const description = await vscode.window.showInputBox({
-			prompt: '输入标签说明',
-			placeHolder: '例如: 快乐表情'
+			prompt: 'Enter a tag description',
+			placeHolder: 'For example: Happy expression'
 		});
 
 		if (!description) return;
 
-		// ✅ 新增：输入别名
+		// ✅ Added: enter aliases.
 		const aliasesInput = await vscode.window.showInputBox({
-			prompt: '输入别名（可选，多个别名用逗号分隔）',
-			placeHolder: '例如: 开心,高兴,愉快'
+			prompt: 'Enter aliases (optional; separate multiple aliases with commas)',
+			placeHolder: 'For example: happy, cheerful, joyful'
 		});
 
 		const aliases = aliasesInput
@@ -571,11 +571,11 @@ export class TagConfigManager {
 			: [];
 
 		const example = await vscode.window.showInputBox({
-			prompt: '输入使用示例（可选）',
-			placeHolder: `例如: NPC: 你好！[#${tagName}]`
+			prompt: 'Enter a usage example (optional)',
+			placeHolder: `For example: NPC: Hello! [#${tagName}]`
 		});
 
-		// ✅ 显示分类选择
+		// ✅ Show category selection.
 		const categoryItems = Array.from(this.metadataCategories.entries()).map(([key, config]) => ({
 			label: `${config.icon} ${key}`,
 			description: config.description,
@@ -583,14 +583,14 @@ export class TagConfigManager {
 		}));
 
 		const categoryPick = await vscode.window.showQuickPick(categoryItems, {
-			placeHolder: '选择标签分类（可选）'
+			placeHolder: 'Select a tag category (optional)'
 		});
 
-		// 获取当前配置
+		// Get the current configuration.
 		const config = vscode.workspace.getConfiguration('dialogue');
 		const currentTags = config.get<Record<string, any>>('customTags', {});
 
-		// 添加新标签
+		// Add the new tag.
 		currentTags[tagName] = {
 			description: description,
 			example: example || `[#${tagName}]`,
@@ -598,21 +598,21 @@ export class TagConfigManager {
 			aliases: aliases
 		};
 
-		// 保存配置
+		// Save the configuration.
 		await config.update('customTags', currentTags, vscode.ConfigurationTarget.Global);
 
-		// ✅ 显示成功消息（含别名信息）
+		// ✅ Show a success message, including alias information.
 		const aliasInfo = aliases.length > 0
-			? `（别名: ${aliases.join(', ')}）`
+			? ` (Aliases: ${aliases.join(', ')})`
 			: '';
 		vscode.window.showInformationMessage(
-			`✅ 元数据标签 [#${tagName}] 已添加！${aliasInfo}`
+			`✅ Metadata tag [#${tagName}] added!${aliasInfo}`
 		);
 	}
 }
 
 /**
- * Dialogue 标签补全提供者（统一处理常规标签和元数据标签）
+ * Dialogue tag completion provider (handles built-in and metadata tags).
  */
 export class DialogueTagCompletionProvider implements vscode.CompletionItemProvider {
 	private tagConfigManager: TagConfigManager;
@@ -630,48 +630,48 @@ export class DialogueTagCompletionProvider implements vscode.CompletionItemProvi
 		const line = document.lineAt(position.line).text;
 		const beforeCursor = line.substring(0, position.character);
 
-		console.log('[Dialogue] ========== 标签补全被触发 ==========');
-		console.log('[Dialogue] 📝 光标前内容:', beforeCursor);
+		console.log('[Dialogue] ========== Tag completion triggered ==========');
+		console.log('[Dialogue] 📝 Text before cursor:', beforeCursor);
 
-		// ✅ 1. 检测是否在行首（最高优先级）
-		// 行首定义：只有空白字符 + 可能的部分关键词
+		// ✅ 1. Check whether the cursor is at the start of a line (highest priority).
+		// A line start contains only whitespace and possibly part of a keyword.
 		const trimmedBeforeCursor = beforeCursor.trimStart();
 		const isAtLineStart = beforeCursor === '' || /^\s+$/.test(beforeCursor) || /^\s*\w*$/.test(beforeCursor);
 
 		if (isAtLineStart) {
-			console.log('[Dialogue] 💡 在行首位置');
+			console.log('[Dialogue] 💡 Cursor is at the start of the line');
 
-			// 提取已输入的部分文本（去除前导空格）
+			// Extract the entered text, excluding leading whitespace.
 			const partialInput = trimmedBeforeCursor;
 
-			// 检查是否可能是关键词
+			// Check whether it could be a keyword.
 			const lineStartKeywords = ['if', 'elif', 'else', 'while', 'match', 'when', 'do', 'do!', 'set', '~', '=>', '-'];
 			const isPossibleKeyword = lineStartKeywords.some(kw => kw.startsWith(partialInput));
 
 			if (partialInput === '' || isPossibleKeyword) {
-				console.log('[Dialogue] ✅ 提供行首关键词补全');
+				console.log('[Dialogue] ✅ Providing line-start keyword completions');
 				return this.getLineStartKeywordCompletions(partialInput);
 			}
 
-			// 如果输入的不是关键词，就不提供补全
-			console.log('[Dialogue] ⚠️ 输入内容不是关键词，跳过补全');
+			// Do not provide completions when the input is not a keyword.
+			console.log('[Dialogue] ⚠️ Input is not a keyword; skipping completions');
 			return [];
 		}
 
-		// ✅ 2. 检测是否在输入行内标签
+		// ✅ 2. Check whether the cursor is entering an inline tag.
 		const isRegularTag = beforeCursor.endsWith('[');
 		const isMetadataTag = /\[#\w*$/.test(beforeCursor);
 
 		if (!isRegularTag && !isMetadataTag) {
-			console.log('[Dialogue] ⚠️ 不在标签输入位置，跳过补全');
+			console.log('[Dialogue] ⚠️ Cursor is not in a tag position; skipping completions');
 			return [];
 		}
 
-		console.log('[Dialogue] 提供行内标签补全');
+		console.log('[Dialogue] Providing inline tag completions');
 
 		const items: vscode.CompletionItem[] = [];
 
-		// 分类图标
+		// Category icons.
 		const categoryIcons: Record<string, string> = {
 			time: '⏱️',
 			audio: '🔊',
@@ -681,28 +681,28 @@ export class DialogueTagCompletionProvider implements vscode.CompletionItemProvi
 			action: '⚡'
 		};
 
-		// 获取所有标签
+		// Get all tags.
 		const allTags = this.tagConfigManager.getAllTags();
 
 		for (const [tagName, tag] of allTags.entries()) {
-			// 过滤：如果输入了 [#，只显示元数据标签
+			// If [# was entered, show only metadata tags.
 			if (isMetadataTag && !tag.isMetadata) continue;
 
-			// ✅ 如果是行内标签（isInline: true），才在 [ 触发时显示
+			// ✅ Only inline tags appear when [ triggers completion.
 			if (isRegularTag && !tag.isInline) continue;
 
-			// ✅ 为元数据标签创建主标签补全项
+			// ✅ Create the primary completion item for metadata tags.
 			if (tag.isMetadata) {
 				items.push(this.createMetadataTagCompletionItem(tag, categoryIcons));
 
-				// ✅ 为每个别名创建补全项
+				// ✅ Create a completion item for each alias.
 				if (tag.alias && tag.alias.length > 0) {
 					for (const alias of tag.alias) {
 						items.push(this.createAliasCompletionItem(alias, tag, categoryIcons));
 					}
 				}
 			} else {
-				// 常规标签的补全项（保持不变）
+				// Completion item for a built-in tag.
 				const item = new vscode.CompletionItem(
 					tagName,
 					vscode.CompletionItemKind.Keyword
@@ -725,24 +725,24 @@ export class DialogueTagCompletionProvider implements vscode.CompletionItemProvi
 				const docs: string[] = [];
 				docs.push(`## ${categoryIcons[tag.category]} [${tagName}]`);
 				docs.push('');
-				docs.push(`**类别:** ${tag.category}`);
+				docs.push(`**Category:** ${tag.category}`);
 				docs.push('');
-				docs.push(`**描述:** ${tag.description}`);
+				docs.push(`**Description:** ${tag.description}`);
 				docs.push('');
-				docs.push('**示例:**');
+				docs.push('**Example:**');
 				docs.push('```dialogue');
 				docs.push(tag.example);
 				docs.push('```');
 
 				if (tag.hasValue) {
 					docs.push('');
-					docs.push(`**参数类型:** \`${tag.valueType}\``);
-					docs.push(`**参数说明:** ${tag.valueHint}`);
+					docs.push(`**Parameter type:** \`${tag.valueType}\``);
+					docs.push(`**Parameter description:** ${tag.valueHint}`);
 				}
 
 				if (tag.isPair) {
 					docs.push('');
-					docs.push('⚠️ **成对标签**，需要闭合标签 `[/' + tagName + ']`');
+					docs.push('⚠️ **Paired tag**; closing tag required `[/' + tagName + ']`');
 				}
 
 				item.documentation = new vscode.MarkdownString(docs.join('\n'));
@@ -761,12 +761,12 @@ export class DialogueTagCompletionProvider implements vscode.CompletionItemProvi
 			}
 		}
 
-		console.log(`[Dialogue] 📦 返回 ${items.length} 个标签补全项`);
+		console.log(`[Dialogue] 📦 Returning ${items.length} tag completion items`);
 		return items;
 	}
 
 	/**
-	 * ✅ 新增：创建元数据标签补全项
+	 * ✅ Added: create a metadata tag completion item.
 	 */
 	private createMetadataTagCompletionItem(
 		tag: DialogueTag,
@@ -785,24 +785,24 @@ export class DialogueTagCompletionProvider implements vscode.CompletionItemProvi
 			: undefined;
 
 		const icon = categoryConfig?.icon || '🏷️';
-		const categoryDesc = categoryConfig?.description || '其他';
+		const categoryDesc = categoryConfig?.description || 'Other';
 		item.detail = `${icon} ${categoryDesc} - ${tag.description}`;
 
 		const docs: string[] = [];
 		docs.push(`## ${icon} #${tag.name}`);
 		docs.push('');
-		docs.push(`**类别:** ${categoryDesc}`);
+		docs.push(`**Category:** ${categoryDesc}`);
 		docs.push('');
-		docs.push(`**描述:** ${tag.description}`);
+		docs.push(`**Description:** ${tag.description}`);
 		docs.push('');
 
-		// ✅ 显示别名信息
+		// ✅ Show alias information.
 		if (tag.alias && tag.alias.length > 0) {
-			docs.push(`**别名:** ${tag.alias.map(a => `\`${a}\``).join(', ')}`);
+			docs.push(`**Aliases:** ${tag.alias.map(a => `\`${a}\``).join(', ')}`);
 			docs.push('');
 		}
 
-		docs.push('**示例:**');
+		docs.push('**Example:**');
 		docs.push('```dialogue');
 		docs.push(tag.example);
 		docs.push('```');
@@ -814,7 +814,7 @@ export class DialogueTagCompletionProvider implements vscode.CompletionItemProvi
 	}
 
 	/**
-	 * ✅ 新增:创建别名补全项
+	 * ✅ Added: create an alias completion item.
 	 */
 	private createAliasCompletionItem(
 		alias: string,
@@ -822,12 +822,12 @@ export class DialogueTagCompletionProvider implements vscode.CompletionItemProvi
 		categoryIcons: Record<string, string>
 	): vscode.CompletionItem {
 		const item = new vscode.CompletionItem(
-			alias,  // 显示别名
-			vscode.CompletionItemKind.Text  // 用文本图标区分
+			alias,  // Display the alias.
+			vscode.CompletionItemKind.Text  // Distinguish it with a text icon.
 		);
 
 		item.insertText = `${tag.name}]`;
-		item.filterText = alias;  // 用于搜索匹配
+		item.filterText = alias;  // Used for search matching.
 
 		const metadataCategory = (tag as any).metadataCategory;
 		const categoryConfig = metadataCategory
@@ -835,52 +835,52 @@ export class DialogueTagCompletionProvider implements vscode.CompletionItemProvi
 			: undefined;
 
 		const icon = categoryConfig?.icon || '🏷️';
-		const categoryDesc = categoryConfig?.description || '其他';
+		const categoryDesc = categoryConfig?.description || 'Other';
 
-		// ✅ 在详情中标注这是别名
-		item.detail = `${icon} ${categoryDesc} - ${tag.description} (别名: ${alias})`;
+		// ✅ Mark this as an alias in the details.
+		item.detail = `${icon} ${categoryDesc} - ${tag.description} (Alias: ${alias})`;
 
 		const docs: string[] = [];
 		docs.push(`## 🔄 ${alias}`);
 		docs.push('');
-		docs.push(`**真实标签:** \`#${tag.name}\``);
+		docs.push(`**Canonical tag:** \`#${tag.name}\``);
 		docs.push('');
-		docs.push(`**类别:** ${categoryDesc}`);
+		docs.push(`**Category:** ${categoryDesc}`);
 		docs.push('');
-		docs.push(`**描述:** ${tag.description}`);
+		docs.push(`**Description:** ${tag.description}`);
 		docs.push('');
 
-		// ✅ 显示所有别名
+		// ✅ Show all aliases.
 		if (tag.alias && tag.alias.length > 1) {
 			const otherAliases = tag.alias.filter(a => a !== alias);
-			docs.push(`**其他别名:** ${otherAliases.map(a => `\`${a}\``).join(', ')}`);
+			docs.push(`**Other aliases:** ${otherAliases.map(a => `\`${a}\``).join(', ')}`);
 			docs.push('');
 		}
 
-		docs.push('**示例:**');
+		docs.push('**Example:**');
 		docs.push('```dialogue');
 		docs.push(tag.example);
 		docs.push('```');
 
 		item.documentation = new vscode.MarkdownString(docs.join('\n'));
 
-		// ✅ 别名排在真实标签后面
+		// ✅ Sort aliases after the canonical tag.
 		item.sortText = `5_metadata_${tag.name}_alias_${alias}`;
 
 		return item;
 	}
 
 	/**
-	 * 获取行首关键词补全
+	 * Get line-start keyword completions.
 	 */
 	private getLineStartKeywordCompletions(partialInput: string): vscode.CompletionItem[] {
 		const items: vscode.CompletionItem[] = [];
 
-		// 需要补全的行首关键词
+		// Line-start keywords to complete.
 		const lineStartKeywords = ['if', 'elif', 'else', 'while', 'match', 'when', 'do', 'do!', 'set', '~', '=>', '-'];
 
 		for (const keyword of lineStartKeywords) {
-			// 过滤：只显示匹配的关键词
+			// Show only matching keywords.
 			if (partialInput !== '' && !keyword.startsWith(partialInput)) {
 				continue;
 			}
@@ -888,7 +888,7 @@ export class DialogueTagCompletionProvider implements vscode.CompletionItemProvi
 			const kwDef = DIALOGUE_KEYWORDS[keyword];
 
 			if (!kwDef) {
-				console.log(`[Dialogue] ⚠️ 关键词 ${keyword} 没有定义`);
+				console.log(`[Dialogue] ⚠️ Keyword ${keyword} has no definition`);
 				continue;
 			}
 
@@ -897,7 +897,7 @@ export class DialogueTagCompletionProvider implements vscode.CompletionItemProvi
 				vscode.CompletionItemKind.Keyword
 			);
 
-			// 设置插入文本
+			// Set insertion text.
 			if (['if', 'elif', 'while', 'match', 'when'].includes(keyword)) {
 				item.insertText = new vscode.SnippetString(`${keyword} \${1:condition}`);
 			} else if (keyword === 'do') {
@@ -921,9 +921,9 @@ export class DialogueTagCompletionProvider implements vscode.CompletionItemProvi
 			const docs: string[] = [];
 			docs.push(`## 🔑 ${keyword}`);
 			docs.push('');
-			docs.push(`**描述:** ${kwDef.description}`);
+			docs.push(`**Description:** ${kwDef.description}`);
 			docs.push('');
-			docs.push('**示例:**');
+			docs.push('**Example:**');
 			docs.push('```dialogue');
 			docs.push(kwDef.example);
 			docs.push('```');
@@ -932,11 +932,11 @@ export class DialogueTagCompletionProvider implements vscode.CompletionItemProvi
 				docs.push('');
 				docs.push('---');
 				docs.push('');
-				docs.push('### 💡 行内用法');
+				docs.push('### 💡 Inline usage');
 				docs.push('');
-				docs.push(`**描述:** ${kwDef.inlineDescription}`);
+				docs.push(`**Description:** ${kwDef.inlineDescription}`);
 				docs.push('');
-				docs.push('**示例:**');
+				docs.push('**Example:**');
 				docs.push('```dialogue');
 				docs.push(kwDef.inlineExample || '');
 				docs.push('```');
@@ -963,13 +963,13 @@ export class DialogueTagCompletionProvider implements vscode.CompletionItemProvi
 			items.push(item);
 		}
 
-		console.log(`[Dialogue] 📦 返回 ${items.length} 个行首关键词补全项`);
+		console.log(`[Dialogue] 📦 Returning ${items.length} line-start keyword completion items`);
 		return items;
 	}
 }
 
 /**
- * Dialogue 标签悬停提示提供者（统一处理）
+ * Dialogue tag hover provider (unified handling).
  */
 class DialogueTagHoverProvider implements vscode.HoverProvider {
 	private tagConfigManager: TagConfigManager;
@@ -984,9 +984,9 @@ class DialogueTagHoverProvider implements vscode.HoverProvider {
 	): Promise<vscode.Hover | undefined> {
 		const line = document.lineAt(position.line).text;
 
-		console.log('[Dialogue] ========== 标签/关键词悬停被触发 ==========');
+		console.log('[Dialogue] ========== Tag/keyword hover triggered ==========');
 
-		// 1. 优先检测行首关键词（if/elif/else/while/match/when/do/set）
+		// 1. Check line-start keywords first (if/elif/else/while/match/when/do/set).
 		const lineFirstKeywordMatch = line.match(/^\s*(if|elif|else|while|match|when|do!?|set)\b/);
 		if (lineFirstKeywordMatch) {
 			const keywordStart = line.indexOf(lineFirstKeywordMatch[1]);
@@ -997,27 +997,27 @@ class DialogueTagHoverProvider implements vscode.HoverProvider {
 
 				const kwDef = DIALOGUE_KEYWORDS[keyword];
 				if (kwDef) {
-					console.log(`[Dialogue] 🔍 找到行首关键词: ${keyword}`);
+					console.log(`[Dialogue] 🔍 Found line-start keyword: ${keyword}`);
 					const docs: string[] = [];
 					docs.push(`## 🔑 ${keyword}`);
 					docs.push('');
-					docs.push(`**描述:** ${kwDef.description}`);
+					docs.push(`**Description:** ${kwDef.description}`);
 					docs.push('');
-					docs.push('**示例:**');
+					docs.push('**Example:**');
 					docs.push('```dialogue');
 					docs.push(kwDef.example);
 					docs.push('```');
 
-					// ✅ 如果有行内用法，也显示出来
+					// ✅ Show inline usage when available.
 					if (kwDef.inlineDescription) {
 						docs.push('');
 						docs.push('---');
 						docs.push('');
-						docs.push('### 💡 行内用法');
+						docs.push('### 💡 Inline usage');
 						docs.push('');
-						docs.push(`**描述:** ${kwDef.inlineDescription}`);
+						docs.push(`**Description:** ${kwDef.inlineDescription}`);
 						docs.push('');
-						docs.push('**示例:**');
+						docs.push('**Example:**');
 						docs.push('```dialogue');
 						docs.push(kwDef.inlineExample || '');
 						docs.push('```');
@@ -1028,7 +1028,7 @@ class DialogueTagHoverProvider implements vscode.HoverProvider {
 			}
 		}
 
-		// ✅ 2. 检测其他特殊关键词（~, =>, {{, }}, %）
+		// ✅ 2. Check other special keywords (~, =>, {{, }}, %).
 		const keywordRange = document.getWordRangeAtPosition(
 			position,
 			/~|=>|\{\{|\}\}|%\d*/
@@ -1040,13 +1040,13 @@ class DialogueTagHoverProvider implements vscode.HoverProvider {
 
 			const kwDef = DIALOGUE_KEYWORDS[word];
 			if (kwDef) {
-				console.log(`[Dialogue] 🔍 找到特殊关键词: ${word}`);
+				console.log(`[Dialogue] 🔍 Found special keyword: ${word}`);
 				const docs: string[] = [];
 				docs.push(`## 🔑 ${word}`);
 				docs.push('');
-				docs.push(`**描述:** ${kwDef.description}`);
+				docs.push(`**Description:** ${kwDef.description}`);
 				docs.push('');
-				docs.push('**示例:**');
+				docs.push('**Example:**');
 				docs.push('```dialogue');
 				docs.push(kwDef.example);
 				docs.push('```');
@@ -1054,7 +1054,7 @@ class DialogueTagHoverProvider implements vscode.HoverProvider {
 			}
 		}
 
-		// ✅ 3. 检测行内标签
+		// ✅ 3. Check inline tags.
 		const inlineTagRegex = /\[(do!?|set)\s+([^\]]+)\]|\[(\/?[a-zA-Z_][a-zA-Z0-9_]*)(?:[\s=]([^\]]+))?\]/g;
 		let match;
 
@@ -1066,18 +1066,18 @@ class DialogueTagHoverProvider implements vscode.HoverProvider {
 				if (match[1]) {
 					const tagName = match[1];
 					const tagValue = match[2]?.trim();
-					console.log(`[Dialogue] 🔍 找到行内动作标签: [${tagName} ${tagValue}]`);
+					console.log(`[Dialogue] 🔍 Found inline action tag: [${tagName} ${tagValue}]`);
 					return this.getInlineTagHover(tagName, tagValue);
 				}
 
 				const tagName = match[3]?.replace(/^\//, '');
 				const tagValue = match[4]?.trim();
-				console.log(`[Dialogue] 🔍 找到行内标签: [${match[3]}${tagValue ? ' ' + tagValue : ''}]`);
+				console.log(`[Dialogue] 🔍 Found inline tag: [${match[3]}${tagValue ? ' ' + tagValue : ''}]`);
 				return this.getInlineTagHover(tagName, tagValue);
 			}
 		}
 
-		// ✅ 4. 检测元数据标签
+		// ✅ 4. Check metadata tags.
 		const metadataTagRegex = /\[#([\w\s,]+)\]/g;
 		while ((match = metadataTagRegex.exec(line)) !== null) {
 			const tagStart = match.index;
@@ -1093,7 +1093,7 @@ class DialogueTagHoverProvider implements vscode.HoverProvider {
 					const thisTagEnd = thisTagStart + tag.length;
 
 					if (position.character >= thisTagStart && position.character <= thisTagEnd) {
-						console.log(`[Dialogue] 🔍 找到元数据标签: #${tag}`);
+						console.log(`[Dialogue] 🔍 Found metadata tag: #${tag}`);
 						return this.getInlineTagHover(tag, undefined);
 					}
 
@@ -1106,29 +1106,29 @@ class DialogueTagHoverProvider implements vscode.HoverProvider {
 	}
 
 	/**
-	 * 获取行内标签悬停信息
+	 * Get inline tag hover information.
 	 */
 	private getInlineTagHover(tagName: string, tagValue?: string, aliasName?: string): vscode.Hover | undefined {
 		const tagDef = this.tagConfigManager.getTag(tagName);
 
 		if (!tagDef) {
-			console.log(`[Dialogue] ⚠️ 未知标签: ${tagName}`);
+			console.log(`[Dialogue] ⚠️ Unknown tag: ${tagName}`);
 			return new vscode.Hover(
 				new vscode.MarkdownString(
-					`⚠️ **未定义的标签:** \`${tagName}\`\n\n` +
-					`💡 你可以在设置中添加此标签的说明`
+					`⚠️ **Undefined tag:** \`${tagName}\`\n\n` +
+					`💡 You can add a description for this tag in Settings.`
 				)
 			);
 		}
 
-		// ✅ 对于 do/do!/set，优先显示行内用法说明
+		// ✅ For do/do!/set, prefer the inline usage description.
 		const kwDef = DIALOGUE_KEYWORDS[tagName];
 		const useInlineDescription = kwDef?.inlineDescription && tagDef.isInline;
 
-		// 生成悬停文档
+		// Build the hover documentation.
 		const docs: string[] = [];
 
-		// 分类图标
+		// Category icons.
 		const categoryIcons: Record<string, string> = {
 			time: '⏱️',
 			audio: '🔊',
@@ -1138,40 +1138,40 @@ class DialogueTagHoverProvider implements vscode.HoverProvider {
 			action: '⚡'
 		};
 
-		// ✅ 为元数据标签显示分类信息
+		// ✅ Show category information for metadata tags.
 		if (tagDef.isMetadata) {
 			const metadataCategory = (tagDef as any).metadataCategory;
 			const categoryConfig = metadataCategory
 				? this.tagConfigManager.getMetadataCategory(metadataCategory)
 				: undefined;
 			const icon = categoryConfig?.icon || '🏷️';
-			const categoryDesc = categoryConfig?.description || '其他';
+			const categoryDesc = categoryConfig?.description || 'Other';
 			
-			// ✅ 如果是通过别名悬停的，显示别名信息
+			// ✅ Show alias information when hovering over an alias.
 			if (aliasName) {
-				docs.push(`## 🔄 别名: ${aliasName}`);
+				docs.push(`## 🔄 Alias: ${aliasName}`);
 				docs.push('');
-				docs.push(`**真实标签:** \`#${tagDef.name}\``);
+				docs.push(`**Canonical tag:** \`#${tagDef.name}\``);
 				docs.push('');
 			} else {
 				docs.push(`## ${icon} #${tagDef.name}`);
 				docs.push('');
 			}
-			docs.push(`**类别:** ${categoryDesc}`);
+			docs.push(`**Category:** ${categoryDesc}`);
 			docs.push('');
 		} else {
 			docs.push(`## ${categoryIcons[tagDef.category]} [${tagDef.name}]`);
 			docs.push('');
 		}
 
-		// ✅ 显示行内描述（如果有）
+		// ✅ Show the inline description when available.
 		if (useInlineDescription && kwDef) {
-			docs.push(`**描述:** ${kwDef.inlineDescription}`);
+			docs.push(`**Description:** ${kwDef.inlineDescription}`);
 		} else {
-			docs.push(`**描述:** ${tagDef.description}`);
+			docs.push(`**Description:** ${tagDef.description}`);
 		}
 
-		// ✅ 显示别名信息
+		// ✅ Show alias information.
 		if (tagDef.alias && tagDef.alias.length > 0) {
 			docs.push('');
 			const allAlias = aliasName
@@ -1179,33 +1179,33 @@ class DialogueTagHoverProvider implements vscode.HoverProvider {
 				: tagDef.alias;
 			
 			if (allAlias.length > 0) {
-				const aliasLabel = aliasName ? '其他别名' : '别名';
+				const aliasLabel = aliasName ? 'Other aliases' : 'Aliases';
 				docs.push(`**${aliasLabel}:** ${allAlias.map(a => `\`${a}\``).join(', ')}`);
 			}
 		}
 
 		if (tagDef.hasValue) {
 			docs.push('');
-			docs.push(`**参数类型:** \`${tagDef.valueType}\``);
+			docs.push(`**Parameter type:** \`${tagDef.valueType}\``);
 			docs.push('');
-			docs.push(`**参数说明:** ${tagDef.valueHint}`);
+			docs.push(`**Parameter description:** ${tagDef.valueHint}`);
 
 			if (tagValue) {
 				docs.push('');
-				docs.push(`**当前值:** \`${tagValue}\``);
+				docs.push(`**Current value:** \`${tagValue}\``);
 
-				// 验证值
+				// Validate the value.
 				if (tagDef.valueType === 'number' && isNaN(Number(tagValue))) {
 					docs.push('');
-					docs.push('⚠️ **警告:** 当前值不是有效的数字');
+					docs.push('⚠️ **Warning:** The current value is not a valid number');
 				}
 			}
 		}
 
 		docs.push('');
-		docs.push('**示例:**');
+		docs.push('**Example:**');
 		docs.push('```dialogue');
-		// ✅ 优先显示行内示例
+		// ✅ Prefer the inline example.
 		if (useInlineDescription && kwDef?.inlineExample) {
 			docs.push(kwDef.inlineExample);
 		} else {
@@ -1213,16 +1213,16 @@ class DialogueTagHoverProvider implements vscode.HoverProvider {
 		}
 		docs.push('```');
 
-		// ✅ 如果是 do/set，额外显示行首用法
+		// ✅ For do/set, also show line-start usage.
 		if (kwDef && (tagName === 'do' || tagName === 'do!' || tagName === 'set')) {
 			docs.push('');
 			docs.push('---');
 			docs.push('');
-			docs.push('### 💡 行首用法');
+			docs.push('### 💡 Line-start usage');
 			docs.push('');
-			docs.push(`**描述:** ${kwDef.description}`);
+			docs.push(`**Description:** ${kwDef.description}`);
 			docs.push('');
-			docs.push('**示例:**');
+			docs.push('**Example:**');
 			docs.push('```dialogue');
 			docs.push(kwDef.example);
 			docs.push('```');
@@ -1230,7 +1230,7 @@ class DialogueTagHoverProvider implements vscode.HoverProvider {
 
 		if (tagDef.isPair) {
 			docs.push('');
-			docs.push('⚠️ **成对标签**，需要闭合标签 `[/' + tagDef.name + ']`');
+			docs.push('⚠️ **Paired tag**; closing tag required `[/' + tagDef.name + ']`');
 		}
 
 		return new vscode.Hover(new vscode.MarkdownString(docs.join('\n')));

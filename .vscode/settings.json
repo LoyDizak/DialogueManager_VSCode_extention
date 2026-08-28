@@ -39,54 +39,54 @@
         "AudioManager"
     ],
     "dialogue.diagnostics.globalVariables": {
-        // 简单类型
+        // Simple types
         "playerName": {
             "type": "String",
-            "comment": "玩家角色名"
+            "comment": "Player character name"
         },
         "gold": {
             "type": "int",
-            "comment": "当前金币数"
+            "comment": "Current gold"
         },
-        // 对象类型(支持属性访问)
+        // Object type (supports property access)
         "gameManager": {
             "type": "GameManager",
-            "comment": "游戏管理器单例"
+            "comment": "Game manager singleton"
         },
-        // 数组类型
+        // Array type
         "inventoryItems": {
             "type": "Array",
-            "comment": "背包物品列表"
+            "comment": "Inventory item list"
         },
-        // 复杂类型
+        // Complex type
         "playerStats": {
             "type": "Dictionary",
-            "comment": "玩家属性",
+            "comment": "Player stats",
             "schema": {
                 "hp": {
                     "type": "int",
-                    "comment": "血量"
+                    "comment": "Health"
                 },
                 "mp": {
                     "type": "int",
-                    "comment": "魔法值"
+                    "comment": "Mana"
                 },
                 "skills": {
                     "type": "Array",
                     "itemType": "String",
-                    "comment": "技能列表"
+                    "comment": "Skill list"
                 },
                 "equipment": {
                     "type": "Dictionary",
-                    "comment": "装备信息",
+                    "comment": "Equipment",
                     "schema": {
                         "weapon": {
                             "type": "String",
-                            "comment": "武器名"
+                            "comment": "Weapon name"
                         },
                         "armor": {
                             "type": "String?",
-                            "comment": "护甲（可选）"
+                            "comment": "Armor (optional)"
                         }
                     }
                 }

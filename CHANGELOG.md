@@ -2,37 +2,37 @@
 
 ## [0.3.0] **2026-04-06**
 
-- 修复代码高亮问题以及错误提示问题。
+- Fixed syntax highlighting and diagnostic message issues.
 
 ## [0.3.1] **2026-04-06**
 
-- 添加自定义全局变量。
-- 修复错误提示失效的问题。
+- Added custom global variables.
+- Fixed an issue that disabled diagnostic messages.
 
 ## [0.3.2] **2026-04-07**
 
-- 修复章节的智能提示。
-- 添加全局类提示，将从类顶部获取文档注释。
-- 添加对话段落预览。
-- 添加对话内容导出功能。
-- 添加关键词提示。
-- 修复一些其他小问题。
+- Fixed title completion.
+- Added global class completion using documentation comments from the top of each class.
+- Added dialogue title previews.
+- Added dialogue content export.
+- Added keyword hover information.
+- Fixed several other issues.
 
 ## [0.3.3] **2026-04-07**
 
-- 增加额外的代码及话题的折叠功能。
-- 添加部分关键词提示。
-- 修复部分代码高亮问题。
-- 话题现在可以自动提取上方注释。
+- Added additional code and title folding.
+- Added more keyword completion.
+- Fixed several syntax highlighting issues.
+- Titles can now automatically extract preceding comments.
 
 ## [0.3.4] **2026-04-07**
 
-- 添加部分自动完成模板。
-- 增加特殊标签。
-- 给所有行生成行ID。
-- 移除所有行ID。
-- 修复一些常规问题。
+- Added more completion snippets.
+- Added special tags.
+- Added line IDs to all dialogue lines.
+- Added removal of all line IDs.
+- Fixed several general issues.
 
 ## [0.3.5] **2026-04-08**
 
-- 添加自定义标签别名。
+- Added custom tag aliases.

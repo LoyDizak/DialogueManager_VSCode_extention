@@ -3,15 +3,15 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import { GodotClass, GlobalVariable, GodotMethodParam, GlobalVariablesConfig } from './interface';
 
-/** ============ 类缓存管理器 ============ */
+/** ============ Class cache manager ============ */
 export class GodotClassCache {
   private classes: Map<string, GodotClass> = new Map();
-  private autoloads: Map<string, string> = new Map(); // 单例名 -> 文件路径
+  private autoloads: Map<string, string> = new Map(); // Singleton name -> file path
   private workspaceFolder?: vscode.WorkspaceFolder;
   private cachedGlobalClassNames: string = '';
 
   private globalMembers: Map<string, { className: string; type: 'method' | 'property' | 'signal' }> = new Map();
-  /** 全局变量存储 */
+  /** Global variable storage */
   private globalVariables: Map<string, GlobalVariable> = new Map();
 
   constructor(workspaceFolder?: vscode.WorkspaceFolder) {
@@ -19,9 +19,9 @@ export class GodotClassCache {
   }
 
   /**
-   * 新增：解析变量的属性路径
-   * 例如：playerStats.equipment.weapon
-   * 返回最终属性的类型和注释
+  * Resolve a variable property path.
+  * For example: playerStats.equipment.weapon
+  * Returns the final property's type and comment.
     */
   resolveVariableProperty(
     variableName: string,
@@ -29,50 +29,50 @@ export class GodotClassCache {
   ): { type: string; comment?: string } | undefined {
     const variable = this.globalVariables.get(variableName);
     if (!variable) {
-      console.log(`[Dialogue] ❌ 未找到全局变量: ${variableName}`);
+      console.log(`[Dialogue] ❌ Global variable not found: ${variableName}`);
       return undefined;
     }
 
-    console.log(`[Dialogue] 🔍 解析属性路径: ${variableName}.${propertyPath.join('.')}`);
+    console.log(`[Dialogue] 🔍 Resolving property path: ${variableName}.${propertyPath.join('.')}`);
 
-    // 从根变量开始递归查找
+    // Recursively search from the root variable.
     return this.resolvePropertyInSchema(variable, propertyPath, 0);
   }
 
   /**
-   * 新增：在 schema 中递归查找属性
+  * Recursively find a property in the schema.
    */
   private resolvePropertyInSchema(
     current: GlobalVariable,
     propertyPath: string[],
     depth: number
   ): { type: string; comment?: string } | undefined {
-    // 已经到达路径末尾
+    // The end of the path has been reached.
     if (depth >= propertyPath.length) {
       return { type: current.type, comment: current.comment };
     }
 
     const currentProp = propertyPath[depth];
 
-    // 如果当前类型不是 Dictionary，无法继续访问
+    // Access cannot continue unless the current type is a Dictionary.
     if (current.type !== 'Dictionary' || !current.schema) {
-      console.log(`[Dialogue] ⚠️ 无法访问 ${current.type} 的属性: ${currentProp}`);
+      console.log(`[Dialogue] ⚠️ Cannot access property '${currentProp}' on ${current.type}`);
       return undefined;
     }
 
-    // 在 schema 中查找属性
+    // Find the property in the schema.
     const nextProp = current.schema[currentProp];
     if (!nextProp) {
-      console.log(`[Dialogue] ❌ 属性不存在: ${currentProp}`);
+      console.log(`[Dialogue] ❌ Property does not exist: ${currentProp}`);
       return undefined;
     }
 
-    // 递归查找下一层
+    // Continue recursively at the next level.
     return this.resolvePropertyInSchema(nextProp, propertyPath, depth + 1);
   }
 
   /**
-   * 新增：获取 Dictionary 的所有属性（用于补全）
+  * Get all Dictionary properties for completion.
    */
   getVariableProperties(variableName: string, propertyPath: string[]): Array<{
     name: string;
@@ -82,7 +82,7 @@ export class GodotClassCache {
     const variable = this.globalVariables.get(variableName);
     if (!variable) return [];
 
-    // 逐层深入，找到目标 Dictionary
+    // Descend through each level until the target Dictionary is found.
     let current = variable;
     for (const prop of propertyPath) {
       if (current.type !== 'Dictionary' || !current.schema) {
@@ -93,7 +93,7 @@ export class GodotClassCache {
       current = next;
     }
 
-    // 返回当前层级的所有属性
+    // Return all properties at the current level.
     if (current.type !== 'Dictionary' || !current.schema) {
       return [];
     }
@@ -107,114 +107,113 @@ export class GodotClassCache {
 
   async initialize(): Promise<void> {
     if (!this.workspaceFolder) {
-      console.log('[Dialogue] ❌ 无工作区，跳过初始化');
+      console.log('[Dialogue] ❌ No workspace; skipping initialization');
       return;
     }
 
-    console.log('[Dialogue] -------- 开始初始化类缓存 --------');
+    console.log('[Dialogue] -------- Starting class cache initialization --------');
 
-    // 1. 解析 global_script_class_cache.cfg
+    // 1. Parse global_script_class_cache.cfg.
     await this.loadGlobalClasses();
 
-    // 2. 解析 project.godot 获取 AutoLoad
+    // 2. Parse project.godot to find AutoLoads.
     await this.loadAutoloads();
 
     this.buildGlobalMembersIndex();
 
-    // 4. 加载全局变量
+    // 4. Load global variables.
     this.loadGlobalVariables();
 
-    console.log('[Dialogue] 类缓存初始化完成');
-    console.log('[Dialogue] 📊 全局类数量:', this.classes.size);
-    console.log('[Dialogue] 📊 AutoLoad 数量:', this.autoloads.size);
-    console.log('[Dialogue] 📊 全局成员数量:', this.globalMembers.size);
-    console.log('[Dialogue] 📊 全局变量数量:', this.globalVariables.size);
+    console.log('[Dialogue] Class cache initialization complete');
+    console.log('[Dialogue] 📊 Global classes:', this.classes.size);
+    console.log('[Dialogue] 📊 AutoLoads:', this.autoloads.size);
+    console.log('[Dialogue] 📊 Global members:', this.globalMembers.size);
+    console.log('[Dialogue] 📊 Global variables:', this.globalVariables.size);
   }
 
   /**
-   * 新增：构建全局成员索引
-   * 从配置的全局类中提取所有公开成员
+  * Build the global member index from configured global classes.
    */
   private buildGlobalMembersIndex(): void {
-    // 获取配置的全局类列表
+    // Get the configured global class list.
     const config = vscode.workspace.getConfiguration('dialogue');
     const globalClassNames: string[] = config.get('diagnostics.globalClasses', []);
 
-    // 优化：检查配置是否变化
+    // Skip rebuilding when the configuration is unchanged.
     const currentConfig = JSON.stringify(globalClassNames);
     if (this.cachedGlobalClassNames === currentConfig && this.globalMembers.size > 0) {
-      console.log('[Dialogue] 🔄 配置未变化，跳过重建索引');
+      console.log('[Dialogue] 🔄 Configuration unchanged; skipping index rebuild');
       return;
     }
 
-    console.log('[Dialogue] 🌐 配置已变化，重新构建全局成员索引');
-    console.log('[Dialogue] 📋 配置的全局类:', globalClassNames);
+    console.log('[Dialogue] 🌐 Configuration changed; rebuilding global member index');
+    console.log('[Dialogue] 📋 Configured global classes:', globalClassNames);
 
-    // 更新缓存
+    // Update the cache.
     this.cachedGlobalClassNames = currentConfig;
 
-    // 清空旧索引
+    // Clear the old index.
     this.globalMembers.clear();
 
-    // 以下代码保持不变
+    // Index each configured class.
     for (const className of globalClassNames) {
       const cls = this.classes.get(className);
       if (!cls) {
-        console.warn(`[Dialogue] ⚠️ 全局类未找到: ${className}`);
+        console.warn(`[Dialogue] ⚠️ Global class not found: ${className}`);
         continue;
       }
-      // 索引方法
+      // Index methods.
       for (const method of cls.methods) {
-        if (method.name.startsWith('_')) continue; // 跳过私有方法
+        if (method.name.startsWith('_')) continue; // Skip private methods.
         if (this.globalMembers.has(method.name)) {
-          console.warn(`[Dialogue] ⚠️ 成员名冲突: ${method.name} (在 ${className} 和 ${this.globalMembers.get(method.name)?.className})`);
+          console.warn(`[Dialogue] ⚠️ Member name conflict: ${method.name} (${className} and ${this.globalMembers.get(method.name)?.className})`);
         } else {
           this.globalMembers.set(method.name, { className, type: 'method' });
         }
       }
-      // 索引属性
+      // Index properties.
       for (const property of cls.properties) {
         if (property.name.startsWith('_')) continue;
         if (this.globalMembers.has(property.name)) {
-          console.warn(`[Dialogue] ⚠️ 成员名冲突: ${property.name}`);
+          console.warn(`[Dialogue] ⚠️ Member name conflict: ${property.name}`);
         } else {
           this.globalMembers.set(property.name, { className, type: 'property' });
         }
       }
-      // 索引信号
+      // Index signals.
       for (const signal of cls.signals) {
         if (signal.startsWith('_')) continue;
         if (this.globalMembers.has(signal)) {
-          console.warn(`[Dialogue] ⚠️ 成员名冲突: ${signal}`);
+          console.warn(`[Dialogue] ⚠️ Member name conflict: ${signal}`);
         } else {
           this.globalMembers.set(signal, { className, type: 'signal' });
         }
       }
-      console.log(`[Dialogue] 📦 已索引全局类: ${className}`);
+      console.log(`[Dialogue] 📦 Indexed global class: ${className}`);
     }
   }
 
   /**
-   * 新增：刷新全局成员索引（配置变更时调用）
+  * Refresh the global member index after configuration changes.
    */
   refreshGlobalMembers(): void {
-    console.log('[Dialogue] 🔄 配置变更，触发索引刷新');
+    console.log('[Dialogue] 🔄 Configuration changed; refreshing index');
 
-    // 强制清除缓存，触发重建
+    // Clear the cache to force a rebuild.
     this.cachedGlobalClassNames = '';
 
     this.buildGlobalMembersIndex();
   }
 
   /**
-   * 新增：根据成员名查找所属的全局类
+  * Find the global class that owns a member.
    */
   resolveGlobalMember(memberName: string): { className: string; type: 'method' | 'property' | 'signal' } | undefined {
     return this.globalMembers.get(memberName);
   }
 
   /**
-   * 新增：获取所有全局成员（用于补全）
+  * Get all global members for completion.
    */
   getGlobalMembers(): Array<{ name: string; className: string; type: 'method' | 'property' | 'signal' }> {
     const members: Array<{ name: string; className: string; type: 'method' | 'property' | 'signal' }> = [];
@@ -225,7 +224,7 @@ export class GodotClassCache {
     return members;
   }
 
-  /** 加载全局类 */
+  /** Load global classes. */
   private async loadGlobalClasses(): Promise<void> {
     const cachePath = path.join(
       this.workspaceFolder!.uri.fsPath,
@@ -234,7 +233,7 @@ export class GodotClassCache {
     );
 
     if (!fs.existsSync(cachePath)) {
-      console.log('[Dialogue] ⚠️ 全局类缓存文件不存在');
+      console.log('[Dialogue] ⚠️ Global class cache file does not exist');
       return;
     }
 
@@ -259,29 +258,29 @@ export class GodotClassCache {
         signals: [],
       };
 
-      // 解析 GDScript 文件
+      // Parse the GDScript file.
       if (fs.existsSync(gdPath)) {
         this.parseGDScriptFile(gdPath, classInfo);
       }
 
       this.classes.set(className, classInfo);
-      console.log(`[Dialogue] 📦 加载类: ${className} (${classInfo.methods.length} 方法, ${classInfo.properties.length} 属性)`);
+      console.log(`[Dialogue] 📦 Loaded class: ${className} (${classInfo.methods.length} methods, ${classInfo.properties.length} properties)`);
     }
   }
 
-  /** 加载 AutoLoad 单例 */
+  /** Load AutoLoad singletons. */
   private async loadAutoloads(): Promise<void> {
     const projectPath = path.join(this.workspaceFolder!.uri.fsPath, 'project.godot');
 
     if (!fs.existsSync(projectPath)) {
-      console.log('[Dialogue] ⚠️ project.godot 不存在');
+      console.log('[Dialogue] ⚠️ project.godot does not exist');
       return;
     }
 
     const content = fs.readFileSync(projectPath, 'utf-8');
 
-    // 匹配 AutoLoad 配置
-    // 格式: AudioManager="*res://scene/common/audio_manager/audio_manager.gd"
+    // Match AutoLoad configuration.
+    // Format: AudioManager="*res://scene/common/audio_manager/audio_manager.gd"
     const autoloadRegex = /^(\w+)="\*?(res:\/\/[^"]+)"$/gm;
     let match;
 
@@ -293,11 +292,11 @@ export class GodotClassCache {
       this.autoloads.set(singletonName, resPath);
       console.log(`[Dialogue] 🌐 AutoLoad: ${singletonName} -> ${resPath}`);
 
-      // 如果不在全局类中，也加入缓存
+      // Add it to the cache when it is not already a global class.
       if (!this.classes.has(singletonName) && fs.existsSync(fsPath)) {
         const classInfo: GodotClass = {
           name: singletonName,
-          base: 'Node', // 默认基类
+          base: 'Node', // Default base class
           path: resPath,
           isTool: false,
           methods: [],
@@ -311,7 +310,7 @@ export class GodotClassCache {
     }
   }
 
-  /** 解析 GDScript 文件内容 */
+  /** Parse GDScript file contents. */
   private parseGDScriptFile(fsPath: string, classInfo: GodotClass): void {
     try {
       const content = fs.readFileSync(fsPath, 'utf-8');
@@ -325,7 +324,7 @@ export class GodotClassCache {
         const line = lines[i];
         const trimmedLine = line.trim();
 
-        // 收集连续的 ## 注释
+        // Collect consecutive ## comments.
         if (trimmedLine.startsWith('##')) {
           const commentText = trimmedLine.substring(2).trim();
           if (pendingDocComment) {
@@ -336,10 +335,10 @@ export class GodotClassCache {
           continue;
         }
 
-        // 匹配函数: func xxx() -> Type:
+        // Match functions: func xxx() -> Type:
         const funcMatch = line.match(/^\s*(?:static\s+)?func\s+(\w+)\s*\(([^)]*)\)\s*(?:->\s*(\w+))?/);
         if (funcMatch) {
-          const params = this.parseMethodParams(funcMatch[2]);  // 新方法
+          const params = this.parseMethodParams(funcMatch[2]);  // Parse method parameters.
 
           classInfo.methods.push({
             name: funcMatch[1],
@@ -352,31 +351,31 @@ export class GodotClassCache {
           continue;
         }
 
-        // ... 其他代码保持不变 ...
+        // Other code is intentionally ignored.
       }
     } catch (error) {
-      console.error(`[Dialogue] ❌ 解析文件失败: ${fsPath}`, error);
+      console.error(`[Dialogue] ❌ Failed to parse file: ${fsPath}`, error);
     }
   }
 
   /**
-   * 提取文件顶部的类注释（连续的 ##）
+  * Extract class comments from the top of the file (consecutive ## lines).
    */
   private extractClassComment(lines: string[]): string | undefined {
     const comments: string[] = [];
     let started = false;
     for (const line of lines) {
       const trimmed = line.trim();
-      // 遇到第一个 ## 时开始收集
+      // Start collecting at the first ## line.
       if (trimmed.startsWith('##')) {
         started = true;
         const text = trimmed.substring(2).trim();
-        if (text) {  // 跳过空注释行
+        if (text) {  // Skip empty comment lines.
           comments.push(text);
         }
         continue;
       }
-      // 遇到非注释行时停止
+      // Stop at the first non-comment line.
       if (started && trimmed && !trimmed.startsWith('#')) {
         break;
       }
@@ -385,9 +384,9 @@ export class GodotClassCache {
   }
 
   /**
-   * 解析方法参数
-   * 输入示例: "slot_id: int, amount: float = 0.0, force: bool = false"
-   * 输出: [
+  * Parse method parameters.
+  * Input example: "slot_id: int, amount: float = 0.0, force: bool = false"
+  * Output: [
    *   { name: "slot_id", type: "int", fullText: "slot_id: int" },
    *   { name: "amount", type: "float", defaultValue: "0.0", fullText: "amount: float = 0.0" },
    *   { name: "force", type: "bool", defaultValue: "false", fullText: "force: bool = false" }
@@ -403,7 +402,7 @@ export class GodotClassCache {
       const trimmed = param.trim();
       if (!trimmed) continue;
 
-      // 匹配格式：name: Type = default_value
+      // Match the format: name: Type = default_value
       const match = trimmed.match(/^(\w+)\s*:\s*(\w+)(?:\s*=\s*(.+))?$/);
 
       if (match) {
@@ -414,7 +413,7 @@ export class GodotClassCache {
           fullText: trimmed
         });
       } else {
-        // 降级处理：无法解析的参数
+        // Fallback for parameters that cannot be parsed.
         params.push({
           name: trimmed,
           type: 'Variant',
@@ -426,7 +425,7 @@ export class GodotClassCache {
     return params;
   }
 
-  /** 将 res:// 路径转换为文件系统路径 */
+  /** Convert a res:// path to a file-system path. */
   private resPathToFsPath(resPath: string): string {
     return path.join(
       this.workspaceFolder!.uri.fsPath,
@@ -434,67 +433,67 @@ export class GodotClassCache {
     );
   }
 
-  /** 获取所有类 */
+  /** Get all classes. */
   getClasses(): GodotClass[] {
     return Array.from(this.classes.values());
   }
 
-  /** 根据名称获取类 */
+  /** Get a class by name. */
   getClass(name: string): GodotClass | undefined {
-    console.log(`[Dialogue] 🔍 查找类: ${name}`);
+    console.log(`[Dialogue] 🔍 Looking up class: ${name}`);
     const cls = this.classes.get(name);
 
     if (cls) {
-      console.log(`[Dialogue] 找到: ${cls.name} (${cls.methods.length} 方法, ${cls.properties.length} 属性)`);
+      console.log(`[Dialogue] Found: ${cls.name} (${cls.methods.length} methods, ${cls.properties.length} properties)`);
     } else {
-      console.log(`[Dialogue] ❌ 未找到`);
-      console.log(`[Dialogue] 📋 可用类: ${Array.from(this.classes.keys()).join(', ')}`);
+      console.log(`[Dialogue] ❌ Not found`);
+      console.log(`[Dialogue] 📋 Available classes: ${Array.from(this.classes.keys()).join(', ')}`);
     }
 
     return cls;
   }
 
-  /** 检查是否是 AutoLoad 单例 */
+  /** Check whether a name is an AutoLoad singleton. */
   isAutoload(name: string): boolean {
     return this.autoloads.has(name);
   }
 
   /**
-   * 加载全局变量配置
+  * Load global variable configuration.
    */
   loadGlobalVariables(): void {
     const config = vscode.workspace.getConfiguration('dialogue');
     const varsConfig: GlobalVariablesConfig = config.get('diagnostics.globalVariables', {});
     this.globalVariables.clear();
     for (const [name, def] of Object.entries(varsConfig)) {
-      // 检查类型是否是内置类型或已定义的类
+      // Check whether the type is built-in or a defined class.
       const isBuiltIn = ['String', 'int', 'float', 'bool', 'Array', 'Dictionary', 'Variant', 'Node', 'Node2D', 'Node3D'].includes(def.type);
       const isCustomClass = this.classes.has(def.type);
       if (!isBuiltIn && !isCustomClass) {
-        console.warn(`[Dialogue] ⚠️ 全局变量 '${name}' 的类型 '${def.type}' 未找到`);
+        console.warn(`[Dialogue] ⚠️ Type '${def.type}' for global variable '${name}' was not found`);
       }
       this.globalVariables.set(name, def);
-      console.log(`[Dialogue] 🌐 全局变量: ${name} (${def.type})`);
+        console.log(`[Dialogue] 🌐 Global variable: ${name} (${def.type})`);
     }
-    console.log(`[Dialogue] 📊 全局变量数量: ${this.globalVariables.size}`);
+    console.log(`[Dialogue] 📊 Global variables: ${this.globalVariables.size}`);
   }
   /**
-   * 获取全局变量
+  * Get a global variable.
    */
   getGlobalVariable(name: string): GlobalVariable | undefined {
     return this.globalVariables.get(name);
   }
   /**
-   * 获取所有全局变量(用于补全)
+  * Get all global variables for completion.
    */
   getAllGlobalVariables(): Array<{ name: string; def: GlobalVariable }> {
     return Array.from(this.globalVariables.entries()).map(([name, def]) => ({ name, def }));
   }
   /**
-   * 刷新全局变量(配置变更时调用)
+  * Refresh global variables after configuration changes.
    */
   refreshGlobalVariables(): void {
-    console.log('[Dialogue] 🔄 刷新全局变量配置');
+    console.log('[Dialogue] 🔄 Refreshing global variable configuration');
     this.loadGlobalVariables();
   }
 }

@@ -1,7 +1,7 @@
 {
   "name": "dialogue-godot-support",
-  "displayName": "Godot Dialogue Manager 增强",
-  "description": "为 Godot 4.x Dialogue Manager 提供强大的 VSCode 支持，包括完整的语法高亮、Godot 类/方法的智能补全、实时类型检查、定义跳转、参数提示、标签补全和 Import 路径补全等功能。",
+  "displayName": "Godot Dialogue Manager Enhanced",
+  "description": "Powerful VS Code support for Godot 4.x Dialogue Manager, including syntax highlighting, intelligent Godot class and method completion, real-time type checking, go-to-definition, signature help, tag completion, and import path completion.",
   "publisher": "hakubox",
   "version": "0.3.5",
   "icon": "icon.png",
@@ -19,92 +19,93 @@
   "categories": [
     "Programming Languages",
     "Snippets",
-    "Formatters",
+           "description": "Expression"
     "Other"
   ],
   "activationEvents": [],
-  "main": "./dist/extension.js",
+           "description": "Audio"
   "contributes": {
     "commands": [
       {
-        "command": "dialogue.removeDialogueIDs",
-        "title": "Dialogue: 清除所有台词 ID",
+           "description": "Background music"
+        "title": "Dialogue: Remove All Dialogue IDs",
         "category": "Dialogue"
       },
-      {
+           "description": "Effect"
         "command": "dialogue.addDialogueIDs",
-        "title": "Dialogue: 为所有台词添加 ID",
+        "title": "Dialogue: Add IDs to All Dialogue Lines",
         "category": "Dialogue"
-      },
+           "description": "Other tags"
       {
         "command": "dialogue.openTagSettings",
-        "title": "Dialogue: 打开标签配置"
+        "title": "Dialogue: Open Tag Settings"
       },
       {
         "command": "dialogue.addNewTag",
-        "title": "Dialogue: 添加新元数据标签"
-      },
+             "description": "Happy expression",
+             "example": "NPC: Hello! [#happy]",
       {
         "command": "dialogue.exportJSON",
-        "title": "Dialogue: 导出文案",
+        "title": "Dialogue: Export Dialogue",
         "category": "Dialogue"
-      },
-      {
+             "description": "Sad expression",
+             "example": "NPC: Sob... [#sad]",
         "command": "dialogue.previewJSON",
-        "title": "Dialogue: 预览文案 (JSON)",
+        "title": "Dialogue: Preview Dialogue (JSON)",
         "category": "Dialogue"
       },
-      {
-        "command": "dialogue.copyJSON",
-        "title": "Dialogue: 复制文案 (JSON)",
+             "description": "Angry expression",
+             "example": "NPC: Damn it! [#angry]",
+        "title": "Dialogue: Copy Dialogue (JSON)",
         "category": "Dialogue"
       }
     ],
-    "menus": {
-      "editor/context": [
+             "description": "Surprised expression",
+             "example": "NPC: What!? [#surprised]",
         {
           "when": "resourceLangId == dialogue",
           "command": "dialogue.removeDialogueIDs",
           "group": "dialogue@1"
-        },
-        {
+             "description": "Knocking sound",
+             "example": "NPC: *Knock knock* [#knock_sound]",
           "when": "resourceLangId == dialogue",
           "command": "dialogue.addDialogueIDs",
           "group": "dialogue@2"
         },
-        {
-          "when": "resourceLangId == dialogue",
+             "description": "Explosion sound",
+             "example": "Boom! [#explosion_sound]",
           "command": "dialogue.openTagSettings",
           "group": "dialogue@3"
         },
         {
-          "when": "resourceLangId == dialogue",
-          "command": "dialogue.addNewTag",
+             "description": "Camera shake effect",
+             "example": "NPC: Prepare to die! [#camera_shake]",
           "group": "dialogue@4"
         },
         {
           "when": "resourceLangId == dialogue",
-          "command": "dialogue.exportJSON",
-          "group": "dialogue@5"
+             "description": "Fade-out animation",
+             "example": "NPC: Goodbye... [#fade_out]",
         },
         {
           "when": "resourceLangId == dialogue",
           "command": "dialogue.previewJSON",
           "group": "dialogue@6"
+          "markdownDescription": "Custom tag configuration. Format:\n```json \n{ \"tagName\": { \"description\": \"Description\", \"example\": \"Example\", \"category\": \"Category\", \"alias\": [\"alias1\", \"alias2\"] } }\n```",
         },
         {
           "when": "resourceLangId == dialogue",
           "command": "dialogue.copyJSON",
           "group": "dialogue@7"
-        }
+               "description": "Tag description"
       ],
       "commandPalette": [
         {
-          "command": "dialogue.removeDialogueIDs",
+               "description": "Usage example"
           "when": "resourceLangId == dialogue"
         },
         {
-          "command": "dialogue.addDialogueIDs",
+               "description": "Tag category (for example emotion, sound, animation, or camera)"
           "when": "resourceLangId == dialogue"
         },
         {
@@ -127,101 +128,101 @@
         "dialogue.diagnostics.enableCustomTags": {
           "type": "boolean",
           "default": true,
-          "description": "是否启用自定义标签补全"
+          "description": "Enable custom tag completion"
         },
         "dialogue.diagnostics.metadataCategories": {
           "type": "object",
           "default": {
             "face": {
               "icon": "😊",
-              "description": "表情"
+              "description": "Expression"
             },
             "se": {
               "icon": "🔊",
-              "description": "音频"
+              "description": "Audio"
             },
             "bgm": {
               "icon": "🎵",
-              "description": "背景音乐"
+              "description": "Background music"
             },
             "effect": {
               "icon": "✨",
-              "description": "特效"
+              "description": "Effect"
             },
             "other": {
               "icon": "🏷️",
-              "description": "其他标签"
+              "description": "Other tags"
             }
           },
-          "description": "标签分类配置"
+          "description": "Tag category configuration"
         },
         "dialogue.diagnostics.customTags": {
           "type": "object",
           "default": {
             "happy": {
-              "description": "快乐表情",
-              "example": "NPC: 你好！[#happy]",
+              "description": "Happy expression",
+              "example": "NPC: Hello! [#happy]",
               "category": "face",
-              "alias": ["开心", "高兴"]
+              "alias": ["joyful", "cheerful"]
             },
             "sad": {
-              "description": "悲伤表情",
-              "example": "NPC: 呜呜...[#sad]",
+              "description": "Sad expression",
+              "example": "NPC: Sob... [#sad]",
               "category": "face",
-              "alias": ["伤心", "难过"]
+              "alias": ["unhappy", "upset"]
             },
             "angry": {
-              "description": "愤怒表情",
-              "example": "NPC: 可恶！[#angry]",
+              "description": "Angry expression",
+              "example": "NPC: Damn it! [#angry]",
               "category": "face",
-              "alias": ["生气", "愤怒"]
+              "alias": ["mad", "furious"]
             },
             "surprised": {
-              "description": "惊讶表情",
-              "example": "NPC: 什么！？[#surprised]",
+              "description": "Surprised expression",
+              "example": "NPC: What!? [#surprised]",
               "category": "face",
-              "alias": ["惊讶", "吃惊"]
+              "alias": ["surprise", "shocked"]
             },
             "knock_sound": {
-              "description": "敲门音效",
-              "example": "NPC: *敲门* [#knock_sound]",
+              "description": "Knocking sound",
+              "example": "NPC: *Knock knock* [#knock_sound]",
               "category": "se",
-              "alias": ["敲门"]
+              "alias": ["knocking"]
             },
             "explosion_sound": {
-              "description": "爆炸音效",
-              "example": "轰！[#explosion_sound]",
+              "description": "Explosion sound",
+              "example": "Boom! [#explosion_sound]",
               "category": "se",
-              "alias": ["爆炸"]
+              "alias": ["explosion"]
             },
             "camera_shake": {
-              "description": "相机震动特效",
-              "example": "NPC: 受死！[#camera_shake]",
+              "description": "Camera shake effect",
+              "example": "NPC: Prepare to die! [#camera_shake]",
               "category": "effect",
-              "alias": ["震动", "抖动"]
+              "alias": ["shake", "jitter"]
             },
             "fade_out": {
-              "description": "淡出动画",
-              "example": "NPC: 再见...[#fade_out]",
+              "description": "Fade-out animation",
+              "example": "NPC: Goodbye... [#fade_out]",
               "category": "effect",
-              "alias": ["淡出"]
+              "alias": ["fade"]
             }
           },
-          "markdownDescription": "自定义标签配置。格式：\n```json \n{ \"标签名\": { \"description\": \"说明\", \"example\": \"示例\", \"category\": \"分类\", \"alias\": [\"别名1\", \"别名2\"] } }\n```",
+          "markdownDescription": "Custom tag configuration. Format:\n```json \n{ \"tagName\": { \"description\": \"Description\", \"example\": \"Example\", \"category\": \"Category\", \"alias\": [\"alias1\", \"alias2\"] } }\n```",
           "additionalProperties": {
             "type": "object",
             "properties": {
               "description": {
                 "type": "string",
-                "description": "标签说明"
+                "description": "Tag description"
               },
               "example": {
                 "type": "string",
-                "description": "使用示例"
+                "description": "Usage example"
               },
               "category": {
                 "type": "string",
-                "description": "标签分类（如 emotion, sound, animation, camera 等）"
+                "description": "Tag category (for example emotion, sound, animation, or camera)"
               }
             },
             "required": [
@@ -233,11 +234,11 @@
         "dialogue.diagnostics.globalClasses": {
           "type": "array",
           "default": [],
-          "description": "全局类列表（可以在对话中省略类名前缀）",
+          "description": "Global classes (their name prefixes may be omitted in dialogue)",
           "items": {
             "type": "string"
           },
-          "markdownDescription": "配置后可以在对话中直接使用成员名，无需类名前缀。\n\n例如：配置 `StageManager` 后，可以直接写 `{{count}}` 而不是 `{{StageManager.count}}`",
+          "markdownDescription": "Once configured, members can be used directly in dialogue without a class name prefix.\n\nFor example, after configuring `StageManager`, write `{{count}}` instead of `{{StageManager.count}}`.",
           "examples": [
             [
               "StageManager",
@@ -249,40 +250,40 @@
         "dialogue.diagnostics.globalVariables": {
           "type": "object",
           "default": {},
-          "description": "全局变量定义（支持复杂嵌套类型）",
+          "description": "Global variable definitions (supports complex nested types)",
           "patternProperties": {
             "^[a-zA-Z_][a-zA-Z0-9_]*$": {
               "type": "object",
               "properties": {
                 "type": {
                   "type": "string",
-                  "description": "变量类型（如 String、int、Dictionary、Array、自定义类名）"
+                  "description": "Variable type (for example String, int, Dictionary, Array, or a custom class name)"
                 },
                 "comment": {
                   "type": "string",
-                  "description": "变量说明"
+                  "description": "Variable description"
                 },
                 "schema": {
                   "type": "object",
-                  "description": "复杂类型的内部结构（仅 Dictionary 可用）",
+                  "description": "Internal structure for complex types (Dictionary only)",
                   "patternProperties": {
                     "^[a-zA-Z_][a-zA-Z0-9_]*$": {
                       "type": "object",
                       "properties": {
                         "type": {
                           "type": "string",
-                          "description": "字段类型（支持 ? 表示可选，如 String?）"
+                          "description": "Field type (use ? for optional values, such as String?)"
                         },
                         "comment": {
                           "type": "string"
                         },
                         "schema": {
                           "type": "object",
-                          "description": "嵌套结构（支持无限层级）"
+                          "description": "Nested structure (supports unlimited depth)"
                         },
                         "itemType": {
                           "type": "string",
-                          "description": "Array 的元素类型（仅 Array 可用）"
+                          "description": "Array element type (Array only)"
                         }
                       },
                       "required": [
@@ -293,7 +294,7 @@
                 },
                 "itemType": {
                   "type": "string",
-                  "description": "Array 的元素类型（仅 Array 可用）"
+                  "description": "Array element type (Array only)"
                 }
               },
               "required": [
@@ -301,12 +302,12 @@
               ]
             }
           },
-          "markdownDescription": "配置全局变量，支持复杂嵌套类型：\n\n**示例 1：简单类型**\n```json\n{\n  \"playerName\": {\n    \"type\": \"String\",\n    \"comment\": \"玩家名\"\n  }\n}\n```\n\n**示例 2：Dictionary 嵌套**\n```json\n{\n  \"playerStats\": {\n    \"type\": \"Dictionary\",\n    \"comment\": \"玩家属性\",\n    \"schema\": {\n      \"hp\": { \"type\": \"int\", \"comment\": \"血量\" },\n      \"skills\": {\n        \"type\": \"Array\",\n        \"itemType\": \"String\",\n        \"comment\": \"技能列表\"\n      }\n    }\n  }\n}\n```\n\n**示例 3：可选类型**\n```json\n{\n  \"equipment\": {\n    \"type\": \"Dictionary\",\n    \"schema\": {\n      \"weapon\": { \"type\": \"String\" },\n      \"armor\": { \"type\": \"String?\", \"comment\": \"可选\" }\n    }\n  }\n}\n```"
+          "markdownDescription": "Configure global variables with support for complex nested types.\n\n**Example 1: Simple type**\n```json\n{\n  \"playerName\": {\n    \"type\": \"String\",\n    \"comment\": \"Player name\"\n  }\n}\n```\n\n**Example 2: Nested Dictionary**\n```json\n{\n  \"playerStats\": {\n    \"type\": \"Dictionary\",\n    \"comment\": \"Player stats\",\n    \"schema\": {\n      \"hp\": { \"type\": \"int\", \"comment\": \"Health\" },\n      \"skills\": {\n        \"type\": \"Array\",\n        \"itemType\": \"String\",\n        \"comment\": \"Skill list\"\n      }\n    }\n  }\n}\n```\n\n**Example 3: Optional type**\n```json\n{\n  \"equipment\": {\n    \"type\": \"Dictionary\",\n    \"schema\": {\n      \"weapon\": { \"type\": \"String\" },\n      \"armor\": { \"type\": \"String?\", \"comment\": \"Optional\" }\n    }\n  }\n}\n```"
         },
         "dialogue.diagnostics.strictMode": {
           "type": "boolean",
           "default": false,
-          "description": "启用严格模式：对所有无法验证的调用报告警告"
+          "description": "Enable strict mode: report warnings for all calls that cannot be verified"
         },
         "dialogue.diagnostics.builtInVariables": {
           "type": "object",
@@ -314,7 +315,7 @@
             "player": "CharacterBody2D",
             "game": "Game"
           },
-          "description": "内置变量的类型映射"
+          "description": "Type mappings for built-in variables"
         }
       }
     },

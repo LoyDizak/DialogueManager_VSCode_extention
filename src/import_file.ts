@@ -1,25 +1,25 @@
-// ============ Import 路径补全提供者 ============
+// ============ Import path completion provider ============
 
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 
-// ============ 增强的 Import 补全提供者 ============
+// ============ Enhanced Import completion provider ============
 
 /**
- * 递归搜索所有 .dialogue 文件
+ * Recursively search all .dialogue files.
  */
 interface DialogueFileInfo {
-	relativePath: string;  // 相对于工作区的路径
-	resPath: string;       // res:// 路径
-	fileName: string;      // 文件名（不含扩展名）
-	fullPath: string;      // 完整文件系统路径
-	depth: number;         // 目录深度
+	relativePath: string;  // Path relative to the workspace.
+	resPath: string;       // res:// path.
+	fileName: string;      // File name (without the extension).
+	fullPath: string;      // Full file-system path.
+	depth: number;         // Directory depth.
 }
 
 
 /**
- * Import 语句补全提供者（增强版）
+ * Import statement completion provider (enhanced).
  */
 export class ImportPathCompletionProvider implements vscode.CompletionItemProvider {
 	private dialogueFiles: DialogueFileInfo[] = [];
@@ -28,36 +28,36 @@ export class ImportPathCompletionProvider implements vscode.CompletionItemProvid
 	constructor(workspaceFolder?: vscode.WorkspaceFolder) {
 		this.workspaceFolder = workspaceFolder;
 		
-		// ✅ 初始化时扫描所有 .dialogue 文件
+		// ✅ Scan all .dialogue files during initialization.
 		if (workspaceFolder) {
 			this.scanDialogueFiles();
 		}
 	}
 
 	/**
-	 * 扫描工作区中所有 .dialogue 文件
+	 * Scan all .dialogue files in the workspace.
 	 */
 	private scanDialogueFiles(): void {
 		if (!this.workspaceFolder) return;
 
-		console.log('[Dialogue] 🔍 开始扫描 .dialogue 文件...');
+		console.log('[Dialogue] 🔍 Scanning .dialogue files...');
 
 		this.dialogueFiles = [];
 		const rootPath = this.workspaceFolder.uri.fsPath;
 
 		this.scanDirectory(rootPath, '', 0);
 
-		console.log(`[Dialogue] ✅ 找到 ${this.dialogueFiles.length} 个 .dialogue 文件`);
+		console.log(`[Dialogue] ✅ Found ${this.dialogueFiles.length} .dialogue files`);
 	}
 
 	/**
-	 * 递归扫描目录
+	 * Recursively scan directories.
 	 */
 	private scanDirectory(absolutePath: string, relativePath: string, depth: number): void {
-		// ✅ 限制递归深度，避免性能问题
+		// ✅ Limit recursion depth to avoid performance issues.
 		if (depth > 10) return;
 
-		// ✅ 跳过隐藏目录和特殊目录
+		// ✅ Skip hidden and special directories.
 		const skipDirs = ['.godot', '.git', 'node_modules', 'addons'];
 		const dirName = path.basename(absolutePath);
 		
@@ -75,10 +75,10 @@ export class ImportPathCompletionProvider implements vscode.CompletionItemProvid
 					: entry.name;
 
 				if (entry.isDirectory()) {
-					// 递归扫描子目录
+					// Recursively scan subdirectories.
 					this.scanDirectory(entryAbsolutePath, entryRelativePath, depth + 1);
 				} else if (entry.isFile() && entry.name.endsWith('.dialogue')) {
-					// 添加 .dialogue 文件
+					// Add the .dialogue file.
 					const resPath = 'res://' + entryRelativePath.replace(/\\/g, '/');
 					const fileName = entry.name.replace('.dialogue', '');
 
@@ -92,7 +92,7 @@ export class ImportPathCompletionProvider implements vscode.CompletionItemProvid
 				}
 			}
 		} catch (error) {
-			console.error(`[Dialogue] ❌ 扫描目录失败: ${absolutePath}`, error);
+			console.error(`[Dialogue] ❌ Failed to scan directory: ${absolutePath}`, error);
 		}
 	}
 
@@ -105,56 +105,56 @@ export class ImportPathCompletionProvider implements vscode.CompletionItemProvid
 		const line = document.lineAt(position.line).text;
 		const beforeCursor = line.substring(0, position.character);
 
-		console.log('[Dialogue] ========== Import 补全被触发 ==========');
-		console.log('[Dialogue] 📝 光标前内容:', beforeCursor);
+		console.log('[Dialogue] ========== Import completion triggered ==========');
+		console.log('[Dialogue] 📝 Text before cursor:', beforeCursor);
 
-		// ✅ 严格检查：必须是 import 语句开头
+		// ✅ Strict check: the line must start with an import statement.
 		if (!/^\s*import\b/.test(line)) {
-			console.log('[Dialogue] ⚠️ 不是 import 语句，跳过');
+			console.log('[Dialogue] ⚠️ Not an import statement; skipping');
 			return [];
 		}
 
-		// ✅ 场景 1: 刚输入 import（后面可能有空格）
+		// ✅ Scenario 1: import was just entered (possibly followed by spaces).
 		if (/^\s*import\s*$/.test(beforeCursor)) {
-			console.log('[Dialogue] 💡 检测到 import，显示所有 .dialogue 文件');
+			console.log('[Dialogue] 💡 Import detected; showing all .dialogue files');
 			return this.provideAllDialogueFiles();
 		}
 
-		// ✅ 场景 2: 正在输入路径
+		// ✅ Scenario 2: entering a path.
 		const pathMatch = beforeCursor.match(/^\s*import\s+"(res:\/\/[^"]*)$/);
 		if (pathMatch) {
 			const currentPath = pathMatch[1];
-			console.log('[Dialogue] 📂 正在输入路径:', currentPath);
+			console.log('[Dialogue] 📂 Entering path:', currentPath);
 			return this.provideFilteredFiles(currentPath);
 		}
 
-		// ✅ 场景 3: 路径输入完成，等待 as
+		// ✅ Scenario 3: path is complete; waiting for as.
 		const completedPathMatch = beforeCursor.match(/^\s*import\s+"(res:\/\/[^"]+)"\s*$/);
 		if (completedPathMatch) {
 			const filePath = completedPathMatch[1];
-			console.log('[Dialogue] 💡 路径已完成，提示 as');
+			console.log('[Dialogue] 💡 Path complete; suggesting as');
 			return this.provideAsAliasCompletion(filePath);
 		}
 
-		// ✅ 场景 4: 正在输入别名
+		// ✅ Scenario 4: entering an alias.
 		const aliasMatch = beforeCursor.match(/^\s*import\s+"(res:\/\/[^"]+)"\s+as\s+(\w*)$/);
 		if (aliasMatch) {
 			const filePath = aliasMatch[1];
-			console.log('[Dialogue] 💡 正在输入别名');
+			console.log('[Dialogue] 💡 Entering alias');
 			return this.provideAsAliasCompletion(filePath);
 		}
 
-		console.log('[Dialogue] ⚠️ 不在 import 补全上下文中');
+		console.log('[Dialogue] ⚠️ Not in an import completion context');
 		return [];
 	}
 
 	/**
-	 * 提供所有 .dialogue 文件的补全
+	 * Provide completion items for all .dialogue files.
 	 */
 	private provideAllDialogueFiles(): vscode.CompletionItem[] {
 		const items: vscode.CompletionItem[] = [];
 
-		// ✅ 按目录深度排序（浅层目录优先）
+		// ✅ Sort by directory depth (shallow directories first).
 		const sortedFiles = [...this.dialogueFiles].sort((a, b) => {
 			if (a.depth !== b.depth) return a.depth - b.depth;
 			return a.fileName.localeCompare(b.fileName);
@@ -166,66 +166,66 @@ export class ImportPathCompletionProvider implements vscode.CompletionItemProvid
 				vscode.CompletionItemKind.File
 			);
 
-			// ✅ 生成别名
+			// ✅ Generate an alias.
 			const alias = this.generateAlias(file.fileName);
 
-			// ✅ 使用 Snippet 插入完整的 import 语句
+			// ✅ Use a snippet to insert the complete import statement.
 			item.insertText = new vscode.SnippetString(
 				`"${file.resPath}" as \${1:${alias}}`
 			);
 
-			// ✅ 显示详细信息
+			// ✅ Show detailed information.
 			const pathParts = file.relativePath.split(path.sep);
-			const dirPath = pathParts.slice(0, -1).join('/') || '根目录';
+			const dirPath = pathParts.slice(0, -1).join('/') || 'Root directory';
 
 			item.detail = `📄 ${dirPath}`;
-			item.filterText = `${file.fileName} ${file.relativePath}`;  // 支持路径搜索
+			item.filterText = `${file.fileName} ${file.relativePath}`;  // Support path search.
 
-			// ✅ 文档
+			// ✅ Documentation.
 			const docs: string[] = [];
 			docs.push(`## 📄 ${file.fileName}.dialogue`);
 			docs.push('');
-			docs.push(`**完整路径:** \`${file.resPath}\``);
-			docs.push(`**目录:** \`${dirPath}\``);
-			docs.push(`**建议别名:** \`${alias}\``);
+			docs.push(`**Full path:** \`${file.resPath}\``);
+			docs.push(`**Directory:** \`${dirPath}\``);
+			docs.push(`**Suggested alias:** \`${alias}\``);
 			docs.push('');
 			docs.push('---');
 			docs.push('');
-			docs.push('💡 **自动生成:** `import "' + file.resPath + '" as ' + alias + '`');
+			docs.push('💡 **Generated automatically:** `import "' + file.resPath + '" as ' + alias + '`');
 
 			item.documentation = new vscode.MarkdownString(docs.join('\n'));
 
-			// ✅ 排序：根目录优先，然后按深度
+			// ✅ Sort with the root directory first, then by depth.
 			item.sortText = `${file.depth}_${file.fileName}`;
 
 			items.push(item);
 		}
 
-		console.log(`[Dialogue] 📦 返回 ${items.length} 个文件补全项`);
+		console.log(`[Dialogue] 📦 Returning ${items.length} file completion items`);
 		return items;
 	}
 
 	/**
-	 * 提供过滤后的文件补全（根据当前输入的路径）
+	 * Provide filtered file completions based on the current path.
 	 */
 	private provideFilteredFiles(currentPath: string): vscode.CompletionItem[] {
 		const items: vscode.CompletionItem[] = [];
 
-		// ✅ 提取当前目录路径
+		// ✅ Extract the current directory path.
 		const pathWithoutProtocol = currentPath.replace('res://', '');
 		const currentDir = pathWithoutProtocol.endsWith('/') 
 			? pathWithoutProtocol 
 			: path.dirname(pathWithoutProtocol) + '/';
 
-		console.log('[Dialogue] 📂 当前目录:', currentDir);
+		console.log('[Dialogue] 📂 Current directory:', currentDir);
 
-		// ✅ 1. 添加子目录补全
+		// ✅ 1. Add subdirectory completions.
 		const uniqueDirs = new Set<string>();
 		
 		for (const file of this.dialogueFiles) {
 			const fileDir = path.dirname(file.relativePath).replace(/\\/g, '/') + '/';
 			
-			// 如果文件在当前目录的子目录中
+			// If the file is in a subdirectory of the current directory.
 			if (fileDir.startsWith(currentDir) && fileDir !== currentDir) {
 				const subDir = fileDir.substring(currentDir.length).split('/')[0];
 				
@@ -239,7 +239,7 @@ export class ImportPathCompletionProvider implements vscode.CompletionItemProvid
 
 					const newPath = `res://${currentDir}${subDir}/`;
 					item.insertText = newPath;
-					item.detail = '📁 目录';
+					item.detail = '📁 Directory';
 					item.sortText = `0_${subDir}`;
 
 					items.push(item);
@@ -247,7 +247,7 @@ export class ImportPathCompletionProvider implements vscode.CompletionItemProvid
 			}
 		}
 
-		// ✅ 2. 添加当前目录中的文件
+		// ✅ 2. Add files in the current directory.
 		for (const file of this.dialogueFiles) {
 			const fileDir = path.dirname(file.relativePath).replace(/\\/g, '/') + '/';
 
@@ -263,9 +263,9 @@ export class ImportPathCompletionProvider implements vscode.CompletionItemProvid
 					`${file.resPath}" as \${1:${alias}}`
 				);
 
-				item.detail = '📄 Dialogue 文件';
+				item.detail = '📄 Dialogue file';
 				item.documentation = new vscode.MarkdownString(
-					`**路径:** \`${file.resPath}\`\n\n**别名:** \`${alias}\``
+					`**Path:** \`${file.resPath}\`\n\n**Alias:** \`${alias}\``
 				);
 
 				item.sortText = `1_${file.fileName}`;
@@ -274,33 +274,33 @@ export class ImportPathCompletionProvider implements vscode.CompletionItemProvid
 			}
 		}
 
-		console.log(`[Dialogue] 📦 返回 ${items.length} 个过滤后的补全项`);
+		console.log(`[Dialogue] 📦 Returning ${items.length} filtered completion items`);
 		return items;
 	}
 
 	/**
-	 * 提供 as 别名补全
+	 * Provide as-alias completions.
 	 */
 	private provideAsAliasCompletion(filePath: string): vscode.CompletionItem[] {
 		const items: vscode.CompletionItem[] = [];
 
-		// ✅ 从路径中提取文件名
+		// ✅ Extract the file name from the path.
 		const fileName = path.basename(filePath, '.dialogue');
 		const alias = this.generateAlias(fileName);
 
-		console.log('[Dialogue] 💡 建议别名:', alias);
+		console.log('[Dialogue] 💡 Suggested alias:', alias);
 
-		// ✅ 创建补全项
+		// ✅ Create the completion item.
 		const item = new vscode.CompletionItem(
 			`as ${alias}`,
 			vscode.CompletionItemKind.Keyword
 		);
 
 		item.insertText = new vscode.SnippetString(`as \${1:${alias}}`);
-		item.detail = '📝 导入别名';
+		item.detail = '📝 Import alias';
 		item.documentation = new vscode.MarkdownString(
-			`根据文件名 \`${fileName}\` 自动生成的别名\n\n` +
-			`完整语句:\n\`\`\`dialogue\nimport "${filePath}" as ${alias}\n\`\`\``
+			`Alias automatically generated from the file name \`${fileName}\`\n\n` +
+			`Complete statement:\n\`\`\`dialogue\nimport "${filePath}" as ${alias}\n\`\`\``
 		);
 
 		items.push(item);
@@ -309,32 +309,32 @@ export class ImportPathCompletionProvider implements vscode.CompletionItemProvid
 	}
 
 	/**
-	 * 生成别名（PascalCase）
+	 * Generate an alias (PascalCase).
 	 */
 	private generateAlias(fileName: string): string {
-		// 移除扩展名
+		// Remove the extension.
 		const nameWithoutExt = fileName.replace(/\.dialogue$/, '');
 
-		// 分割下划线、连字符或空格
+		// Split on underscores, hyphens, or spaces.
 		const words = nameWithoutExt.split(/[-_\s]/);
 
-		// 转为 PascalCase
+		// Convert to PascalCase.
 		const pascalCase = words.join('');
 
 		return pascalCase;
 	}
 
 	/**
-	 * 刷新文件列表（当文件系统变化时调用）
+	 * Refresh the file list (called when the file system changes).
 	 */
 	public refresh(): void {
-		console.log('[Dialogue] 🔄 刷新 .dialogue 文件列表');
+		console.log('[Dialogue] 🔄 Refreshing .dialogue file list');
 		this.scanDialogueFiles();
 	}
 }
 
 
-// ============ Import 悬停提示提供者 ============
+// ============ Import hover provider ============
 
 export class ImportHoverProvider implements vscode.HoverProvider {
 	constructor(private workspaceFolder?: vscode.WorkspaceFolder) {}
@@ -345,13 +345,13 @@ export class ImportHoverProvider implements vscode.HoverProvider {
 	): Promise<vscode.Hover | undefined> {
 		const line = document.lineAt(position.line).text;
 
-		// ✅ 匹配 import 语句
+		// ✅ Match import statements.
 		const importMatch = line.match(/^\s*import\s+"(res:\/\/[^"]+)"\s+as\s+(\w+)/);
 		if (!importMatch) return undefined;
 
 		const [, filePath, alias] = importMatch;
 
-		// 检查光标是否在路径或别名上
+		// Check whether the cursor is on the path or alias.
 		const pathStart = line.indexOf(filePath);
 		const pathEnd = pathStart + filePath.length;
 		const aliasStart = line.lastIndexOf(alias);
@@ -362,7 +362,7 @@ export class ImportHoverProvider implements vscode.HoverProvider {
 
 		if (!isOnPath && !isOnAlias) return undefined;
 
-		// ✅ 获取文件信息
+		// ✅ Get file information.
 		if (!this.workspaceFolder) return undefined;
 
 		const fsPath = path.join(
@@ -372,29 +372,29 @@ export class ImportHoverProvider implements vscode.HoverProvider {
 
 		if (!fs.existsSync(fsPath)) {
 			return new vscode.Hover(
-				new vscode.MarkdownString(`⚠️ **文件不存在**\n\n路径: \`${filePath}\``)
+				new vscode.MarkdownString(`⚠️ **File does not exist**\n\nPath: \`${filePath}\``)
 			);
 		}
 
-		// ✅ 读取文件信息
+		// ✅ Read file information.
 		const stat = fs.statSync(fsPath);
 		const content = fs.readFileSync(fsPath, 'utf-8');
 		const lines = content.split('\n');
 
-		// 统计标题数量
+		// Count titles.
 		const titleCount = lines.filter(line => line.trim().startsWith('~')).length;
 
 		const docs: string[] = [];
 		docs.push(`## 📄 ${path.basename(filePath)}`);
 		docs.push('');
-		docs.push(`**路径:** \`${filePath}\``);
-		docs.push(`**别名:** \`${alias}\``);
-		docs.push(`**大小:** ${(stat.size / 1024).toFixed(2)} KB`);
-		docs.push(`**对话标题数量:** ${titleCount}`);
+		docs.push(`**Path:** \`${filePath}\``);
+		docs.push(`**Alias:** \`${alias}\``);
+		docs.push(`**Size:** ${(stat.size / 1024).toFixed(2)} KB`);
+		docs.push(`**Dialogue title count:** ${titleCount}`);
 		docs.push('');
 		docs.push('---');
 		docs.push('');
-		docs.push('💡 **提示:** 使用 `Ctrl + 点击` 可以跳转到文件');
+		docs.push('💡 **Tip:** Use `Ctrl + Click` to open the file');
 
 		return new vscode.Hover(new vscode.MarkdownString(docs.join('\n')));
 	}
