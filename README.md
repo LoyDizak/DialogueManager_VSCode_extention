@@ -9,9 +9,9 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/hakubox/dialogue-godot-support">GitHub</a> •
-  <a href="https://github.com/hakubox/dialogue-godot-support/issues">Report an issue</a> •
-  <a href="https://github.com/hakubox/dialogue-godot-support/releases">Download</a>
+  <a href="https://github.com/LoyDizak/DialogueManager_VSCode_extention">GitHub</a> •
+  <a href="https://github.com/LoyDizak/DialogueManager_VSCode_extention/issues">Report an issue</a> •
+  <a href="https://github.com/LoyDizak/DialogueManager_VSCode_extention/releases">Download</a>
 </p>
 
 ---
@@ -84,7 +84,7 @@
 4. Click **Install**
 
 #### Method B: Install manually from a `.vsix`
-1. Download the latest `.vsix` file from GitHub Releases [<sup>8</sup>](https://github.com/hakubox/dialogue-godot-support/releases)
+1. Download the latest `.vsix` file from GitHub Releases [<sup>8</sup>](https://github.com/LoyDizak/DialogueManager_VSCode_extention/releases)
 2. Press `Ctrl+Shift+P` in VS Code
 3. Enter `Extensions: Install from VSIX...`
 4. Select the downloaded `.vsix` file
@@ -655,7 +655,7 @@ Alternatively, register the class globally, then restart VS Code or wait for the
 ### Setup
 
 ```bash
-git clone https://github.com/hakubox/dialogue-godot-support.git
+git clone https://github.com/LoyDizak/DialogueManager_VSCode_extention.git
 cd dialogue-godot-support
 npm install
 ```
@@ -698,9 +698,10 @@ MIT License - See the LICENSE [<sup>9</sup>](LICENSE) file for details
 
 ## 📧 Contact
 
-- **GitHub Issues**: Submit an issue [<sup>13</sup>](https://github.com/hakubox/dialogue-godot-support/issues)
+- **GitHub Issues**: Submit an issue [<sup>13</sup>](https://github.com/LoyDizak/DialogueManager_VSCode_extention/issues)
 - **Author**: hakubox
 - **Email**: hakubox@outlook.com
+- **Translated by**: Loy_Dizak
 
 ---
 
